@@ -2,7 +2,9 @@ import { AppContent } from '@/components/app-content';
 import { AppShell } from '@/components/app-shell';
 import { AppSidebar } from '@/components/app-sidebar';
 import { AppSidebarHeader } from '@/components/app-sidebar-header';
+import { FlashMessage } from '@/components/flash-message';
 import type { AppLayoutProps } from '@/types';
+import { Toaster } from 'sonner';
 
 export default function AppSidebarLayout({
     children,
@@ -13,8 +15,10 @@ export default function AppSidebarLayout({
             <AppSidebar />
             <AppContent variant="sidebar" className="overflow-x-hidden">
                 <AppSidebarHeader breadcrumbs={breadcrumbs} />
+                <FlashMessage />
                 {children}
             </AppContent>
+            <Toaster position="top-right" richColors />
         </AppShell>
     );
 }

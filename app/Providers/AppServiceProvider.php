@@ -46,5 +46,11 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+
+        // Bind custom LoginResponse to redirect to dashboard
+        $this->app->bind(
+            \Laravel\Fortify\Contracts\LoginResponse::class,
+            \App\Http\Responses\LoginResponse::class,
+        );
     }
 }

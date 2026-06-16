@@ -1,4 +1,4 @@
-# Database Schema — OutletKu
+﻿# Database Schema — OutletKu
 
 **Database:** MySQL 8.0  
 **ORM:** Laravel Eloquent  
@@ -45,7 +45,7 @@ transactions ──< transaction_items
 
 ### `super_admins` *(Fase 3 — Sprint 7; terpisah dari users biasa)*
 ```sql
-id                  BIGINT PK
+id                  UUID PK
 name                VARCHAR(100)
 email               VARCHAR(100) UNIQUE
 password            VARCHAR(255)
@@ -58,7 +58,7 @@ created_at, updated_at
 
 ### `businesses` (Tenant)
 ```sql
-id                  BIGINT PK
+id                  UUID PK
 name                VARCHAR(100)
 slug                VARCHAR(50) UNIQUE          -- untuk URL kasir: /kasir/{business:slug}; generate dari name saat register
 owner_name          VARCHAR(100)                -- sync dari users.name owner saat register
@@ -74,8 +74,8 @@ created_at, updated_at
 
 ### `users`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
+id                  UUID PK
+business_id         UUID FK → businesses.id
 name                VARCHAR(100)
 email               VARCHAR(100) UNIQUE NULL   -- NULL untuk kasir (login via PIN)
 password            VARCHAR(255) NULL          -- NULL untuk kasir
@@ -98,8 +98,8 @@ INDEX: (business_id), (email)
 
 ### `outlets`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
+id                  UUID PK
+business_id         UUID FK → businesses.id
 name                VARCHAR(100)
 address             TEXT NULL
 phone               VARCHAR(20) NULL
@@ -112,8 +112,8 @@ INDEX: (business_id)
 
 ### `outlet_user` (Pivot)
 ```sql
-outlet_id           BIGINT FK
-user_id             BIGINT FK
+outlet_id           UUID FK
+user_id             UUID FK
 created_at, updated_at
 
 PRIMARY KEY (outlet_id, user_id)
@@ -121,10 +121,10 @@ PRIMARY KEY (outlet_id, user_id)
 
 ### `shifts` (manajemen shift kasir)
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-outlet_id           BIGINT FK → outlets.id
-user_id             BIGINT FK → users.id     -- kasir yang buka shift
+id                  UUID PK
+business_id         UUID FK → businesses.id
+outlet_id           UUID FK → outlets.id
+user_id             UUID FK → users.id     -- kasir yang buka shift
 opened_at           TIMESTAMP                -- waktu buka shift
 closed_at           TIMESTAMP NULL           -- NULL = shift masih aktif
 opening_cash        DECIMAL(12,2) DEFAULT 0  -- uang kas awal
@@ -144,17 +144,17 @@ APP RULE: hanya boleh ada 1 shift `open` per outlet
 
 ### `categories`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK
+id                  UUID PK
+business_id         UUID FK
 name                VARCHAR(100)
 created_at, updated_at
 ```
 
 ### `products`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK
-category_id         BIGINT FK NULL
+id                  UUID PK
+business_id         UUID FK
+category_id         UUID FK NULL
 name                VARCHAR(150)
 sku                 VARCHAR(50) NULL
 unit                VARCHAR(20)
@@ -169,10 +169,10 @@ INDEX: (business_id), (category_id)
 
 ### `stocks`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-outlet_id           BIGINT FK
-product_id          BIGINT FK
+id                  UUID PK
+business_id         UUID FK → businesses.id
+outlet_id           UUID FK
+product_id          UUID FK
 quantity            DECIMAL(12,2) DEFAULT 0
 low_stock_threshold DECIMAL(12,2) DEFAULT 5
 updated_at
@@ -183,18 +183,18 @@ INDEX: (business_id)
 
 ### `stock_movements`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-outlet_id           BIGINT FK
-product_id          BIGINT FK
+id                  UUID PK
+business_id         UUID FK → businesses.id
+outlet_id           UUID FK
+product_id          UUID FK
 type                ENUM('in','out','adjustment')
 quantity            DECIMAL(12,2)
 quantity_before     DECIMAL(12,2)
 quantity_after      DECIMAL(12,2)
 reference_type      VARCHAR(50) NULL
-reference_id        BIGINT NULL
+reference_id        UUID NULL
 note                TEXT NULL
-created_by          BIGINT FK → users.id
+created_by          UUID FK → users.id
 created_at
 
 INDEX: (business_id), (outlet_id, product_id), (created_at)
@@ -202,10 +202,10 @@ INDEX: (business_id), (outlet_id, product_id), (created_at)
 
 ### `transactions`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-outlet_id           BIGINT FK
-shift_id            BIGINT FK NULL → shifts.id    -- wajib untuk kasir; NULL untuk transaksi langsung owner/manager
+id                  UUID PK
+business_id         UUID FK → businesses.id
+outlet_id           UUID FK
+shift_id            UUID FK NULL → shifts.id    -- wajib untuk kasir; NULL untuk transaksi langsung owner/manager
 invoice_number      VARCHAR(50)
 transaction_date    DATE
 subtotal            DECIMAL(12,2)
@@ -215,7 +215,7 @@ payment_method      ENUM('cash','transfer','other') DEFAULT 'cash'
 is_void             BOOLEAN DEFAULT false       -- true jika transaksi dibatalkan
 voided_at           TIMESTAMP NULL
 note                TEXT NULL
-created_by          BIGINT FK → users.id
+created_by          UUID FK → users.id
 created_at, updated_at
 
 UNIQUE KEY (business_id, invoice_number)
@@ -224,10 +224,10 @@ INDEX: (business_id), (outlet_id), (shift_id), (transaction_date)
 
 ### `transaction_items`
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-transaction_id      BIGINT FK
-product_id          BIGINT FK
+id                  UUID PK
+business_id         UUID FK → businesses.id
+transaction_id      UUID FK
+product_id          UUID FK
 product_name        VARCHAR(150)
 selling_price       DECIMAL(12,2)
 cost_price          DECIMAL(12,2)
@@ -240,23 +240,23 @@ INDEX: (business_id), (transaction_id)
 
 ### `expense_categories` *(Fase 2 — Sprint 4)*
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK
+id                  UUID PK
+business_id         UUID FK
 name                VARCHAR(100)
 created_at, updated_at
 ```
 
 ### `expenses` *(Fase 2 — Sprint 4)*
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-outlet_id           BIGINT FK NULL
-expense_category_id BIGINT FK NULL
+id                  UUID PK
+business_id         UUID FK → businesses.id
+outlet_id           UUID FK NULL
+expense_category_id UUID FK NULL
 amount              DECIMAL(12,2)
 expense_date        DATE
 description         TEXT NULL
 attachment          VARCHAR(255) NULL
-created_by          BIGINT FK → users.id
+created_by          UUID FK → users.id
 created_at, updated_at
 
 INDEX: (business_id), (outlet_id), (expense_date)
@@ -264,15 +264,15 @@ INDEX: (business_id), (outlet_id), (expense_date)
 
 ### `cash_transfers` *(Fase 2 — Sprint 4; migration boleh dibuat lebih awal, UI aktif Sprint 4)*
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-from_outlet_id      BIGINT FK NULL → outlets.id   -- NULL jika dari owner
-to_outlet_id        BIGINT FK NULL → outlets.id   -- NULL jika setoran ke owner
+id                  UUID PK
+business_id         UUID FK → businesses.id
+from_outlet_id      UUID FK NULL → outlets.id   -- NULL jika dari owner
+to_outlet_id        UUID FK NULL → outlets.id   -- NULL jika setoran ke owner
 amount              DECIMAL(12,2)
 transfer_date       DATE
 type                ENUM('outlet_to_outlet','outlet_to_owner','owner_to_outlet')
 description         TEXT NULL
-created_by          BIGINT FK → users.id
+created_by          UUID FK → users.id
 created_at, updated_at
 
 INDEX: (business_id), (from_outlet_id), (to_outlet_id), (transfer_date)
@@ -280,9 +280,9 @@ INDEX: (business_id), (from_outlet_id), (to_outlet_id), (transfer_date)
 
 ### `notifications` *(Fase 2 — Sprint 6)*
 ```sql
-id                  BIGINT PK
-business_id         BIGINT FK → businesses.id
-user_id             BIGINT FK
+id                  UUID PK
+business_id         UUID FK → businesses.id
+user_id             UUID FK
 type                VARCHAR(100)
 title               VARCHAR(200)
 body                TEXT

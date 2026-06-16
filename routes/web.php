@@ -1,11 +1,37 @@
 <?php
 
+use App\Http\Controllers\Business\BusinessController;
+use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Outlet\OutletController;
+use App\Http\Controllers\User\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Public welcome page
 Route::inertia('/', 'welcome')->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('dashboard', 'dashboard')->name('dashboard');
+// Authenticated routes
+Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
+
+    // Dashboard
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Outlet management (owner + manager)
+    Route::middleware('role:owner|manager')->group(function () {
+        Route::resource('outlets', OutletController::class);
+        Route::post('outlets/{outlet}/assign-users', [OutletController::class, 'assignUsers'])
+            ->name('outlets.assign-users');
+    });
+
+    // User management (owner only)
+    Route::middleware('role:owner')->group(function () {
+        Route::resource('users', UserController::class);
+    });
+
+    // Business settings (owner only)
+    Route::middleware('role:owner')->prefix('settings')->name('settings.')->group(function () {
+        Route::get('business', [BusinessController::class, 'show'])->name('business');
+        Route::put('business', [BusinessController::class, 'update'])->name('business.update');
+    });
 });
 
 require __DIR__.'/settings.php';
