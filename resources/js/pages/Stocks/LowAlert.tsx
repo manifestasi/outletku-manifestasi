@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
-import { index, restockForm, lowAlert } from '@/actions/App/Http/Controllers/Stock/StockController';
+import { index, showRestock, lowAlert } from '@/actions/App/Http/Controllers/Stock/StockController';
 
 export default function LowAlert({ stocks }: { stocks: any }) {
     return (
@@ -62,7 +62,7 @@ export default function LowAlert({ stocks }: { stocks: any }) {
                                             </td>
                                             <td className="p-3">
                                                 <Button size="sm" asChild>
-                                                    <Link href={restockForm.url()}>Restock</Link>
+                                                    <Link href={showRestock.url()}>Restock</Link>
                                                 </Button>
                                             </td>
                                         </tr>

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { FormEventHandler } from 'react';
-import { index, restock, restockForm } from '@/actions/App/Http/Controllers/Stock/StockController';
+import { index, restock, showRestock } from '@/actions/App/Http/Controllers/Stock/StockController';
 
 export default function Restock({ outlets, products }: { outlets: any[]; products: any[] }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -117,6 +117,6 @@ export default function Restock({ outlets, products }: { outlets: any[]; product
 Restock.layout = {
     breadcrumbs: [
         { title: 'Stocks', href: index.url() },
-        { title: 'Restock', href: restockForm.url() },
+        { title: 'Restock', href: showRestock.url() },
     ],
 };

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Plus, SlidersHorizontal, AlertTriangle, ArrowRightLeft } from 'lucide-react';
 import { useState } from 'react';
 
-import { index, restockForm, adjustForm, movements } from '@/actions/App/Http/Controllers/Stock/StockController';
+import { index, showRestock, showAdjust, movements } from '@/actions/App/Http/Controllers/Stock/StockController';
 
 export default function Index({ stocks, outlets, filters }: { stocks: any; outlets: any[]; filters: any }) {
     const [search, setSearch] = useState(filters.search || '');
@@ -35,13 +35,13 @@ export default function Index({ stocks, outlets, filters }: { stocks: any; outle
                         </Link>
                     </Button>
                     <Button asChild variant="secondary">
-                        <Link href={adjustForm.url()}>
+                        <Link href={showAdjust.url()}>
                             <SlidersHorizontal className="w-4 h-4 mr-2" />
                             Adjust
                         </Link>
                     </Button>
                     <Button asChild>
-                        <Link href={restockForm.url()}>
+                        <Link href={showRestock.url()}>
                             <Plus className="w-4 h-4 mr-2" />
                             Restock
                         </Link>

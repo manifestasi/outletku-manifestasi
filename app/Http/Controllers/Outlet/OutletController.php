@@ -117,10 +117,10 @@ class OutletController extends Controller
     public function assignUsers(Request $request, Outlet $outlet): RedirectResponse
     {
         $request->validate([
-            'user_ids' => ['required', 'array'],
+            'user_ids'   => ['required', 'array'],
             'user_ids.*' => [
-                'integer',
-                Rule::exists('users', 'id')->where('business_id', Auth::user()->business_id),
+                'uuid',
+                \Illuminate\Validation\Rule::exists('users', 'id')->where('business_id', Auth::user()->business_id),
             ],
         ]);
 

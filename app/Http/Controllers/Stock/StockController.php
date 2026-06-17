@@ -81,7 +81,7 @@ class StockController extends Controller
     /**
      * Show the form for restocking.
      */
-    public function restockForm(Request $request)
+    public function showRestock(Request $request)
     {
         $outlets = Outlet::where('is_active', true)->get(['id', 'name']);
         $products = Product::where('is_active', true)->get(['id', 'name', 'sku']);
@@ -115,7 +115,7 @@ class StockController extends Controller
     /**
      * Show the form for adjusting stock.
      */
-    public function adjustForm(Request $request)
+    public function showAdjust(Request $request)
     {
         $outlets = Outlet::where('is_active', true)->get(['id', 'name']);
         $products = Product::where('is_active', true)->get(['id', 'name', 'sku']);

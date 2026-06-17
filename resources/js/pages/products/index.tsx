@@ -75,7 +75,7 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Produk', href: '/products' }]}>
+        <>
             <Head title="Manajemen Produk" />
 
             <div className="flex flex-col space-y-6 p-6">
@@ -107,9 +107,11 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                                 </form>
                             </DialogContent>
                         </Dialog>
-                        <Link href="/products/create">
-                            <Button className="bg-indigo-600 hover:bg-indigo-700"><Plus className="w-4 h-4 mr-2" /> Tambah Produk</Button>
-                        </Link>
+                        <Button className="bg-indigo-600 hover:bg-indigo-700" asChild>
+                            <Link href="/products/create">
+                                <Plus className="w-4 h-4 mr-2" /> Tambah Produk
+                            </Link>
+                        </Button>
                     </div>
                 </div>
 
@@ -178,13 +180,24 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                                         </td>
                                         <td className="px-4 py-4 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <Link href={`/products/${product.id}/edit`}>
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-600"><Edit className="w-4 h-4" /></Button>
-                                                </Link>
-                                                {product.is_active && (
-                                                    <Link href={`/products/${product.id}`} method="delete" as="button">
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"><Trash2 className="w-4 h-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-gray-400 hover:text-gray-600" asChild>
+                                                    <Link href={`/products/${product.id}/edit`}>
+                                                        <Edit className="w-4 h-4" />
                                                     </Link>
+                                                </Button>
+                                                {product.is_active && (
+                                                    <Button 
+                                                        variant="ghost" 
+                                                        size="icon" 
+                                                        className="h-8 w-8 text-gray-400 hover:text-red-600"
+                                                        onClick={() => {
+                                                            if (confirm(`Nonaktifkan produk "${product.name}"?`)) {
+                                                                router.delete(`/products/${product.id}`);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </Button>
                                                 )}
                                             </div>
                                         </td>
@@ -219,6 +232,12 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                     )}
                 </div>
             </div>
-        </AppLayout>
+        </>
     );
 }
+
+ProductIndex.layout = (page: React.ReactNode) => (
+    <AppLayout breadcrumbs={[{ title: 'Produk', href: '/products' }]}>
+        {page}
+    </AppLayout>
+);

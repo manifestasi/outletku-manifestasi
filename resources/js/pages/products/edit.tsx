@@ -44,14 +44,16 @@ export default function ProductEdit({ categories, product }: { categories: Categ
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Produk', href: '/products' }, { title: 'Edit Produk', href: `/products/${product.id}/edit` }]}>
+        <>
             <Head title={`Edit Produk: ${product.name}`} />
 
             <div className="max-w-3xl mx-auto p-6">
                 <div className="flex items-center gap-4 mb-6">
-                    <Link href="/products">
-                        <Button variant="outline" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
-                    </Link>
+                    <Button variant="outline" size="icon" asChild>
+                        <Link href="/products">
+                            <ArrowLeft className="w-4 h-4" />
+                        </Link>
+                    </Button>
                     <h1 className="text-2xl font-bold text-gray-900">Edit Produk</h1>
                 </div>
 
@@ -122,9 +124,9 @@ export default function ProductEdit({ categories, product }: { categories: Categ
                     </div>
 
                     <div className="flex justify-end pt-4 border-t border-gray-100">
-                        <Link href="/products" className="mr-4">
-                            <Button type="button" variant="ghost">Batal</Button>
-                        </Link>
+                        <Button type="button" variant="ghost" className="mr-4" asChild>
+                            <Link href="/products">Batal</Link>
+                        </Button>
                         <Button type="submit" disabled={processing} className="bg-indigo-600 hover:bg-indigo-700">
                             <Save className="w-4 h-4 mr-2" />
                             Simpan Perubahan
@@ -132,6 +134,15 @@ export default function ProductEdit({ categories, product }: { categories: Categ
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
+
+ProductEdit.layout = (page: any) => (
+    <AppLayout breadcrumbs={[
+        { title: 'Produk', href: '/products' },
+        { title: 'Edit Produk', href: `/products/${page.props.product?.id}/edit` }
+    ]}>
+        {page}
+    </AppLayout>
+);

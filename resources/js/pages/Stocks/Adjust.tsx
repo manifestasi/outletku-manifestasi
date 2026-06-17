@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { FormEventHandler } from 'react';
-import { index, adjust, adjustForm } from '@/actions/App/Http/Controllers/Stock/StockController';
+import { index, adjust, showAdjust } from '@/actions/App/Http/Controllers/Stock/StockController';
 
 export default function Adjust({ outlets, products }: { outlets: any[]; products: any[] }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -117,6 +117,6 @@ export default function Adjust({ outlets, products }: { outlets: any[]; products
 Adjust.layout = {
     breadcrumbs: [
         { title: 'Stocks', href: index.url() },
-        { title: 'Adjust', href: adjustForm.url() },
+        { title: 'Adjust', href: showAdjust.url() },
     ],
 };

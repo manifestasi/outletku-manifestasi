@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\StoreProductRequest;
+use App\Http\Requests\Product\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Http\RedirectResponse;
@@ -15,7 +17,7 @@ use Inertia\Response;
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of products.
      */
     public function index(Request $request): Response
     {
@@ -33,18 +35,18 @@ class ProductController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        $products = $query->paginate(10)->withQueryString();
+        $products   = $query->paginate(10)->withQueryString();
         $categories = Category::orderBy('name')->get();
 
         return Inertia::render('products/index', [
-            'products' => $products,
+            'products'   => $products,
             'categories' => $categories,
-            'filters' => $request->only(['search', 'category_id']),
+            'filters'    => $request->only(['search', 'category_id']),
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form for creating a new product.
      */
     public function create(): Response
     {
@@ -56,20 +58,11 @@ class ProductController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created product in storage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreProductRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'sku' => ['nullable', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:50'],
-            'selling_price' => ['required', 'numeric', 'min:0'],
-            'cost_price' => ['required', 'numeric', 'min:0'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'is_active' => ['boolean'],
-        ]);
+        $validated = $request->validated();
 
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -77,48 +70,39 @@ class ProductController extends Controller
         }
 
         Product::create([
-            'business_id' => Auth::user()->business_id,
-            'category_id' => $validated['category_id'] ?? null,
-            'name' => $validated['name'],
-            'sku' => $validated['sku'] ?? null,
-            'unit' => $validated['unit'],
+            'business_id'   => Auth::user()->business_id,
+            'category_id'   => $validated['category_id'] ?? null,
+            'name'          => $validated['name'],
+            'sku'           => $validated['sku'] ?? null,
+            'unit'          => $validated['unit'],
             'selling_price' => $validated['selling_price'],
-            'cost_price' => $validated['cost_price'],
-            'image' => $imagePath,
-            'is_active' => $validated['is_active'] ?? true,
+            'cost_price'    => $validated['cost_price'],
+            'image'         => $imagePath,
+            'is_active'     => $validated['is_active'] ?? true,
         ]);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing the specified product.
      */
     public function edit(Product $product): Response
     {
         $categories = Category::orderBy('name')->get();
 
         return Inertia::render('products/edit', [
-            'product' => $product,
+            'product'    => $product,
             'categories' => $categories,
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified product in storage.
      */
-    public function update(Request $request, Product $product): RedirectResponse
+    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'category_id' => ['nullable', 'exists:categories,id'],
-            'sku' => ['nullable', 'string', 'max:255'],
-            'unit' => ['required', 'string', 'max:50'],
-            'selling_price' => ['required', 'numeric', 'min:0'],
-            'cost_price' => ['required', 'numeric', 'min:0'],
-            'image' => ['nullable', 'image', 'max:2048'],
-            'is_active' => ['boolean'],
-        ]);
+        $validated = $request->validated();
 
         $imagePath = $product->image;
         if ($request->hasFile('image')) {
@@ -129,21 +113,21 @@ class ProductController extends Controller
         }
 
         $product->update([
-            'category_id' => $validated['category_id'] ?? null,
-            'name' => $validated['name'],
-            'sku' => $validated['sku'] ?? null,
-            'unit' => $validated['unit'],
+            'category_id'   => $validated['category_id'] ?? null,
+            'name'          => $validated['name'],
+            'sku'           => $validated['sku'] ?? null,
+            'unit'          => $validated['unit'],
             'selling_price' => $validated['selling_price'],
-            'cost_price' => $validated['cost_price'],
-            'image' => $imagePath,
-            'is_active' => $validated['is_active'] ?? true,
+            'cost_price'    => $validated['cost_price'],
+            'image'         => $imagePath,
+            'is_active'     => $validated['is_active'] ?? true,
         ]);
 
         return redirect()->route('products.index')->with('success', 'Produk berhasil diperbarui.');
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deactivate the specified product (soft deactivate, not hard delete).
      */
     public function destroy(Product $product): RedirectResponse
     {

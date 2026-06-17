@@ -31,14 +31,16 @@ export default function ProductCreate({ categories }: { categories: Category[] }
     };
 
     return (
-        <AppLayout breadcrumbs={[{ title: 'Produk', href: '/products' }, { title: 'Tambah Produk', href: '/products/create' }]}>
+        <>
             <Head title="Tambah Produk" />
 
             <div className="max-w-3xl mx-auto p-6">
                 <div className="flex items-center gap-4 mb-6">
-                    <Link href="/products">
-                        <Button variant="outline" size="icon"><ArrowLeft className="w-4 h-4" /></Button>
-                    </Link>
+                    <Button variant="outline" size="icon" asChild>
+                        <Link href="/products">
+                            <ArrowLeft className="w-4 h-4" />
+                        </Link>
+                    </Button>
                     <h1 className="text-2xl font-bold text-gray-900">Tambah Produk Baru</h1>
                 </div>
 
@@ -106,9 +108,9 @@ export default function ProductCreate({ categories }: { categories: Category[] }
                     </div>
 
                     <div className="flex justify-end pt-4 border-t border-gray-100">
-                        <Link href="/products" className="mr-4">
-                            <Button type="button" variant="ghost">Batal</Button>
-                        </Link>
+                        <Button type="button" variant="ghost" className="mr-4" asChild>
+                            <Link href="/products">Batal</Link>
+                        </Button>
                         <Button type="submit" disabled={processing} className="bg-indigo-600 hover:bg-indigo-700">
                             <Save className="w-4 h-4 mr-2" />
                             Simpan Produk
@@ -116,6 +118,15 @@ export default function ProductCreate({ categories }: { categories: Category[] }
                     </div>
                 </form>
             </div>
-        </AppLayout>
+        </>
     );
 }
+
+ProductCreate.layout = (page: React.ReactNode) => (
+    <AppLayout breadcrumbs={[
+        { title: 'Produk', href: '/products' },
+        { title: 'Tambah Produk', href: '/products/create' }
+    ]}>
+        {page}
+    </AppLayout>
+);

@@ -27,9 +27,9 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
 
         // Stocks management
         Route::get('stocks', [\App\Http\Controllers\Stock\StockController::class, 'index'])->name('stocks.index');
-        Route::get('stocks/restock', [\App\Http\Controllers\Stock\StockController::class, 'restockForm'])->name('stocks.restock');
+        Route::get('stocks/restock', [\App\Http\Controllers\Stock\StockController::class, 'showRestock'])->name('stocks.restock');
         Route::post('stocks/restock', [\App\Http\Controllers\Stock\StockController::class, 'restock'])->name('stocks.restock.store');
-        Route::get('stocks/adjust', [\App\Http\Controllers\Stock\StockController::class, 'adjustForm'])->name('stocks.adjust');
+        Route::get('stocks/adjust', [\App\Http\Controllers\Stock\StockController::class, 'showAdjust'])->name('stocks.adjust');
         Route::post('stocks/adjust', [\App\Http\Controllers\Stock\StockController::class, 'adjust'])->name('stocks.adjust.store');
         Route::get('stocks/movements', [\App\Http\Controllers\Stock\StockController::class, 'movements'])->name('stocks.movements');
         Route::get('stocks/low-alert', [\App\Http\Controllers\Stock\StockController::class, 'lowAlert'])->name('stocks.lowAlert');
