@@ -24,7 +24,19 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
         // Products & Categories
         Route::resource('categories', \App\Http\Controllers\Product\CategoryController::class)->only(['store', 'update', 'destroy']);
         Route::resource('products', \App\Http\Controllers\Product\ProductController::class);
+
+        // Stocks management
+        Route::get('stocks', [\App\Http\Controllers\Stock\StockController::class, 'index'])->name('stocks.index');
+        Route::get('stocks/restock', [\App\Http\Controllers\Stock\StockController::class, 'restockForm'])->name('stocks.restock');
+        Route::post('stocks/restock', [\App\Http\Controllers\Stock\StockController::class, 'restock'])->name('stocks.restock.store');
+        Route::get('stocks/adjust', [\App\Http\Controllers\Stock\StockController::class, 'adjustForm'])->name('stocks.adjust');
+        Route::post('stocks/adjust', [\App\Http\Controllers\Stock\StockController::class, 'adjust'])->name('stocks.adjust.store');
+        Route::get('stocks/movements', [\App\Http\Controllers\Stock\StockController::class, 'movements'])->name('stocks.movements');
+        Route::get('stocks/low-alert', [\App\Http\Controllers\Stock\StockController::class, 'lowAlert'])->name('stocks.lowAlert');
     });
+
+    // Stocks for specific outlet (accessible by cashier too, controller will verify assignment)
+    Route::get('outlets/{outlet}/stocks', [\App\Http\Controllers\Stock\StockController::class, 'byOutlet'])->name('outlets.stocks');
 
     // User management (owner only)
     Route::middleware('role:owner')->group(function () {

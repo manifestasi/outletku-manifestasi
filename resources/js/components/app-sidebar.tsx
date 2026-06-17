@@ -53,6 +53,11 @@ export function AppSidebar() {
                     href: '/products',
                     icon: Package,
                 },
+                {
+                    title: 'Manajemen Stok',
+                    href: '/stocks',
+                    icon: Package, // Consider using a better icon like 'Layers' or 'Boxes' if available, but Package is fine.
+                },
             ]
             : []),
         // User management — owner only
