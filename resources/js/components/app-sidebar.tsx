@@ -6,6 +6,7 @@ import {
     Settings,
     Store,
     Users,
+    Package,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -42,32 +43,37 @@ export function AppSidebar() {
         // Outlet management — owner & manager
         ...(isOwnerOrManager
             ? [
-                  {
-                      title: 'Outlet',
-                      href: '/outlets',
-                      icon: Store,
-                  },
-              ]
+                {
+                    title: 'Outlet',
+                    href: '/outlets',
+                    icon: Store,
+                },
+                {
+                    title: 'Produk & Kategori',
+                    href: '/products',
+                    icon: Package,
+                },
+            ]
             : []),
         // User management — owner only
         ...(isOwner
             ? [
-                  {
-                      title: 'Tim & Kasir',
-                      href: '/users',
-                      icon: Users,
-                  },
-              ]
+                {
+                    title: 'Tim & Kasir',
+                    href: '/users',
+                    icon: Users,
+                },
+            ]
             : []),
         // Reports — owner & manager (Sprint 5)
         ...(isOwnerOrManager
             ? [
-                  {
-                      title: 'Laporan',
-                      href: '/reports',
-                      icon: BarChart3,
-                  },
-              ]
+                {
+                    title: 'Laporan',
+                    href: '/reports',
+                    icon: BarChart3,
+                },
+            ]
             : []),
     ];
 
@@ -75,12 +81,12 @@ export function AppSidebar() {
         // Business settings — owner only
         ...(isOwner
             ? [
-                  {
-                      title: 'Pengaturan Bisnis',
-                      href: '/settings/business',
-                      icon: Settings,
-                  },
-              ]
+                {
+                    title: 'Pengaturan Bisnis',
+                    href: '/settings/business',
+                    icon: Settings,
+                },
+            ]
             : []),
     ];
 

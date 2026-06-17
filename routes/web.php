@@ -20,6 +20,10 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
         Route::resource('outlets', OutletController::class);
         Route::post('outlets/{outlet}/assign-users', [OutletController::class, 'assignUsers'])
             ->name('outlets.assign-users');
+
+        // Products & Categories
+        Route::resource('categories', \App\Http\Controllers\Product\CategoryController::class)->only(['store', 'update', 'destroy']);
+        Route::resource('products', \App\Http\Controllers\Product\ProductController::class);
     });
 
     // User management (owner only)
