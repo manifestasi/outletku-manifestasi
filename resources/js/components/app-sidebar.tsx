@@ -6,6 +6,8 @@ import {
     Settings,
     Store,
     Users,
+    Package,
+    Tags,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -42,32 +44,47 @@ export function AppSidebar() {
         // Outlet management — owner & manager
         ...(isOwnerOrManager
             ? [
-                  {
-                      title: 'Outlet',
-                      href: '/outlets',
-                      icon: Store,
-                  },
-              ]
+                {
+                    title: 'Outlet',
+                    href: '/outlets',
+                    icon: Store,
+                },
+                {
+                    title: 'Kategori',
+                    href: '/categories',
+                    icon: Tags,
+                },
+                {
+                    title: 'Produk',
+                    href: '/products',
+                    icon: Package,
+                },
+                {
+                    title: 'Manajemen Stok',
+                    href: '/stocks',
+                    icon: Package, // Consider using a better icon like 'Layers' or 'Boxes' if available, but Package is fine.
+                },
+            ]
             : []),
         // User management — owner only
         ...(isOwner
             ? [
-                  {
-                      title: 'Tim & Kasir',
-                      href: '/users',
-                      icon: Users,
-                  },
-              ]
+                {
+                    title: 'Tim & Kasir',
+                    href: '/users',
+                    icon: Users,
+                },
+            ]
             : []),
         // Reports — owner & manager (Sprint 5)
         ...(isOwnerOrManager
             ? [
-                  {
-                      title: 'Laporan',
-                      href: '/reports',
-                      icon: BarChart3,
-                  },
-              ]
+                {
+                    title: 'Laporan',
+                    href: '/reports',
+                    icon: BarChart3,
+                },
+            ]
             : []),
     ];
 
@@ -75,12 +92,12 @@ export function AppSidebar() {
         // Business settings — owner only
         ...(isOwner
             ? [
-                  {
-                      title: 'Pengaturan Bisnis',
-                      href: '/settings/business',
-                      icon: Settings,
-                  },
-              ]
+                {
+                    title: 'Pengaturan Bisnis',
+                    href: '/settings/business',
+                    icon: Settings,
+                },
+            ]
             : []),
     ];
 
