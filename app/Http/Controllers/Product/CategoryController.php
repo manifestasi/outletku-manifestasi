@@ -7,9 +7,30 @@ use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class CategoryController extends Controller
 {
+    /**
+     * Display a listing of the categories.
+     */
+    public function index(Request $request): Response
+    {
+        $query = Category::query();
+
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        $categories = $query->latest()->paginate(20)->withQueryString();
+
+        return Inertia::render('Categories/Index', [
+            'categories' => $categories,
+            'filters' => $request->only('search'),
+        ]);
+    }
+
     /**
      * Store a newly created resource in storage.
      */

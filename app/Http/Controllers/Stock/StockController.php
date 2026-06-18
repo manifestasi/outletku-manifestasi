@@ -25,7 +25,8 @@ class StockController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Stock::with(['outlet:id,name', 'product:id,name,sku']);
+        $query = Stock::with(['outlet:id,name', 'product:id,name,sku'])
+            ->whereHas('outlet');
 
         if ($request->filled('search')) {
             $productIds = Product::where('name', 'like', '%' . $request->search . '%')
@@ -149,7 +150,8 @@ class StockController extends Controller
      */
     public function movements(Request $request)
     {
-        $query = StockMovement::with(['stock.outlet:id,name', 'stock.product:id,name,sku', 'user:id,name']);
+        $query = StockMovement::with(['stock.outlet:id,name', 'stock.product:id,name,sku', 'user:id,name'])
+            ->whereHas('stock.outlet');
 
         // Filters
         if ($request->filled('outlet_id')) {
@@ -190,6 +192,7 @@ class StockController extends Controller
     public function lowAlert()
     {
         $stocks = Stock::with(['outlet:id,name', 'product:id,name,sku'])
+            ->whereHas('outlet')
             ->whereRaw('quantity <= low_stock_threshold')
             ->paginate(20);
 

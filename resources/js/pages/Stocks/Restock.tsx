@@ -102,7 +102,7 @@ export default function Restock({ outlets, products }: { outlets: any[]; product
                             {errors.note && <p className="text-sm text-destructive">{errors.note}</p>}
                         </div>
                     </CardContent>
-                    <CardFooter className="flex justify-end gap-2">
+                    <CardFooter className="flex justify-end gap-4 border-t pt-6 mt-4">
                         <Button variant="outline" type="button" asChild>
                             <Link href={index.url()}>Cancel</Link>
                         </Button>

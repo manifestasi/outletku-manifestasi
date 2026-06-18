@@ -7,6 +7,7 @@ import {
     Store,
     Users,
     Package,
+    Tags,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -49,7 +50,12 @@ export function AppSidebar() {
                     icon: Store,
                 },
                 {
-                    title: 'Produk & Kategori',
+                    title: 'Kategori',
+                    href: '/categories',
+                    icon: Tags,
+                },
+                {
+                    title: 'Produk',
                     href: '/products',
                     icon: Package,
                 },

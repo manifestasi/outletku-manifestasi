@@ -16,6 +16,7 @@ class DashboardService
     public function getStockWidgets(): array
     {
         $lowStockAlerts = Stock::with(['outlet:id,name', 'product:id,name,sku,unit'])
+            ->whereHas('outlet')
             ->whereRaw('quantity <= low_stock_threshold')
             ->orderBy('quantity')
             ->get();

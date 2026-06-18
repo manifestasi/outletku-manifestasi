@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useForm } from '@inertiajs/react';
-import { useState, FormEvent } from 'react';
-import { Search, Plus, Edit, Trash2, FolderEdit } from 'lucide-react';
+import { useState } from 'react';
+import { Search, Plus, Edit, Trash2 } from 'lucide-react';
 
 interface Category {
     id: string;
@@ -44,11 +44,20 @@ interface IndexProps {
 export default function ProductIndex({ products, categories, filters }: IndexProps) {
     const [search, setSearch] = useState(filters.search || '');
     const [categoryId, setCategoryId] = useState(filters.category_id || 'all');
-    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
-    const { data: catData, setData: setCatData, post: postCat, processing: catProcessing, errors: catErrors, reset: catReset } = useForm({
-        name: ''
-    });
+    const handleDelete = (product: Product) => {
+        setProductToDelete(product);
+    };
+
+    const confirmDelete = () => {
+        if (productToDelete) {
+            router.delete(`/products/${productToDelete.id}`, {
+                onSuccess: () => setProductToDelete(null),
+                preserveScroll: true,
+            });
+        }
+    };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,16 +67,6 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
     const handleCategoryFilter = (value: string) => {
         setCategoryId(value);
         router.get('/products', { search, category_id: value === 'all' ? undefined : value }, { preserveState: true });
-    };
-
-    const submitCategory = (e: FormEvent) => {
-        e.preventDefault();
-        postCat('/categories', {
-            onSuccess: () => {
-                catReset();
-                setIsCategoryModalOpen(false);
-            }
-        });
     };
 
     const formatCurrency = (amount: number) => {
@@ -80,33 +79,8 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
 
             <div className="flex flex-col space-y-6 p-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h1 className="text-2xl font-bold text-gray-900">Produk & Kategori</h1>
+                    <h1 className="text-2xl font-bold text-gray-900">Daftar Produk</h1>
                     <div className="flex items-center space-x-2">
-                        <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
-                            <DialogTrigger asChild>
-                                <Button variant="outline"><FolderEdit className="w-4 h-4 mr-2" /> Kategori</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Tambah Kategori Baru</DialogTitle>
-                                </DialogHeader>
-                                <form onSubmit={submitCategory} className="space-y-4">
-                                    <div>
-                                        <label className="text-sm font-medium">Nama Kategori</label>
-                                        <Input
-                                            value={catData.name}
-                                            onChange={e => setCatData('name', e.target.value)}
-                                            placeholder="Contoh: Minuman, Makanan Ringan"
-                                            className="mt-1"
-                                        />
-                                        {catErrors.name && <p className="text-sm text-red-600 mt-1">{catErrors.name}</p>}
-                                    </div>
-                                    <div className="flex justify-end">
-                                        <Button type="submit" disabled={catProcessing}>Simpan Kategori</Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
                         <Button className="bg-indigo-600 hover:bg-indigo-700" asChild>
                             <Link href="/products/create">
                                 <Plus className="w-4 h-4 mr-2" /> Tambah Produk
@@ -114,6 +88,22 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                         </Button>
                     </div>
                 </div>
+
+                <Dialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Konfirmasi Hapus</DialogTitle>
+                        </DialogHeader>
+                        <p className="text-sm text-gray-500 mt-2">
+                            Apakah Anda yakin ingin menonaktifkan produk <span className="font-semibold text-gray-900">"{productToDelete?.name}"</span>? 
+                            Produk tidak akan muncul lagi di kasir POS.
+                        </p>
+                        <div className="flex justify-end gap-2 mt-6">
+                            <Button type="button" variant="ghost" onClick={() => setProductToDelete(null)}>Batal</Button>
+                            <Button type="button" className="bg-red-600 hover:bg-red-700 text-white" onClick={confirmDelete}>Ya, Hapus</Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4">
                     <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -190,11 +180,7 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                                                         variant="ghost" 
                                                         size="icon" 
                                                         className="h-8 w-8 text-gray-400 hover:text-red-600"
-                                                        onClick={() => {
-                                                            if (confirm(`Nonaktifkan produk "${product.name}"?`)) {
-                                                                router.delete(`/products/${product.id}`);
-                                                            }
-                                                        }}
+                                                        onClick={() => handleDelete(product)}
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </Button>

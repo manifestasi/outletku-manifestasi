@@ -27,16 +27,20 @@ interface Product {
 
 export default function ProductEdit({ categories, product }: { categories: Category[], product: Product }) {
     const { data, setData, post, processing, errors } = useForm({
-        name: product.name,
-        category_id: product.category_id || '',
-        sku: product.sku || '',
-        unit: product.unit,
-        selling_price: product.selling_price.toString(),
-        cost_price: product.cost_price.toString(),
+        name: product?.name || '',
+        category_id: product?.category_id || '',
+        sku: product?.sku || '',
+        unit: product?.unit || '',
+        selling_price: product?.selling_price?.toString() || '',
+        cost_price: product?.cost_price?.toString() || '',
         image: null as File | null,
-        is_active: product.is_active,
+        is_active: product?.is_active ?? true,
         _method: 'PUT', // For file uploads in Laravel with PUT
     });
+
+    if (!product) {
+        return <div className="p-6">Loading or Product not found...</div>;
+    }
 
     const submit = (e: FormEvent) => {
         e.preventDefault();
@@ -138,11 +142,14 @@ export default function ProductEdit({ categories, product }: { categories: Categ
     );
 }
 
-ProductEdit.layout = (page: any) => (
-    <AppLayout breadcrumbs={[
-        { title: 'Produk', href: '/products' },
-        { title: 'Edit Produk', href: `/products/${page.props.product?.id}/edit` }
-    ]}>
-        {page}
-    </AppLayout>
-);
+ProductEdit.layout = (page: any) => {
+    const product = page.props?.product || {};
+    return (
+        <AppLayout breadcrumbs={[
+            { title: 'Produk', href: '/products' },
+            { title: 'Edit Produk', href: `/products/${product.id || ''}/edit` }
+        ]}>
+            {page}
+        </AppLayout>
+    );
+};
