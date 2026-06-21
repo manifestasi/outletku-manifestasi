@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\Business\BusinessController;
 use App\Http\Controllers\Dashboard\DashboardController;
+use App\Http\Controllers\Finance\CashTransferController;
+use App\Http\Controllers\Finance\ExpenseController;
+use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\Kasir\KasirAuthController;
 use App\Http\Controllers\Kasir\ShiftController;
 use App\Http\Controllers\Outlet\OutletController;
@@ -47,6 +50,23 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
         Route::get('shifts', [ShiftController::class, 'index'])->name('shifts.index');
         Route::get('shifts/{shift}', [ShiftController::class, 'show'])->name('shifts.show');
         Route::post('shifts/{shift}/force-close', [ShiftController::class, 'forceClose'])->name('shifts.forceClose');
+
+        // --- Sprint 4: Keuangan ---
+
+        // Pengeluaran
+        Route::resource('expenses', ExpenseController::class)->except(['show']);
+
+        // Transfer Kas
+        Route::get('cash-transfers', [CashTransferController::class, 'index'])->name('cash-transfers.index');
+        Route::get('cash-transfers/create', [CashTransferController::class, 'create'])->name('cash-transfers.create');
+        Route::post('cash-transfers', [CashTransferController::class, 'store'])->name('cash-transfers.store');
+        Route::delete('cash-transfers/{cashTransfer}', [CashTransferController::class, 'destroy'])->name('cash-transfers.destroy');
+
+        // Ringkasan Keuangan
+        Route::prefix('finance')->name('finance.')->group(function () {
+            Route::get('daily', [FinanceController::class, 'daily'])->name('daily');
+            Route::get('profit-loss', [FinanceController::class, 'profitLoss'])->name('profitLoss');
+        });
     });
 
     // Transaction show + store (cashier needs show for receipt print)

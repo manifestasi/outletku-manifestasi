@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             StockSeeder::class,
             ShiftSeeder::class,
+            ExpenseCategorySeeder::class,
+            ExpenseSeeder::class,
+            CashTransferSeeder::class,
         ]);
     }
 }

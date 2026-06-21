@@ -10,6 +10,7 @@ import {
     Users,
     Package,
     Tags,
+    Wallet,
 } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
@@ -76,6 +77,21 @@ export function AppSidebar() {
                     href: '/shifts',
                     icon: Clock,
                 },
+                {
+                    title: 'Pengeluaran',
+                    href: '/expenses',
+                    icon: Wallet,
+                },
+                {
+                    title: 'Transfer Kas',
+                    href: '/cash-transfers',
+                    icon: BarChart3,
+                },
+                {
+                    title: 'Keuangan',
+                    href: '/finance/daily',
+                    icon: BarChart3,
+                },
             ]
             : []),
         // User management — owner only
@@ -89,15 +105,7 @@ export function AppSidebar() {
             ]
             : []),
         // Reports — owner & manager (Sprint 5)
-        ...(isOwnerOrManager
-            ? [
-                {
-                    title: 'Laporan',
-                    href: '/reports',
-                    icon: BarChart3,
-                },
-            ]
-            : []),
+        // ...(isOwnerOrManager ? [{ title: 'Laporan', href: '/reports', icon: BarChart3 }] : []),
     ];
 
     const footerNavItems: NavItem[] = [
