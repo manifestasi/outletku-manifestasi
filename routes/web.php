@@ -8,6 +8,7 @@ use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\Kasir\KasirAuthController;
 use App\Http\Controllers\Kasir\ShiftController;
 use App\Http\Controllers\Outlet\OutletController;
+use App\Http\Controllers\Reports\ReportController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\User\UserController;
 use App\Http\Middleware\KasirShiftMiddleware;
@@ -66,6 +67,27 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
         Route::prefix('finance')->name('finance.')->group(function () {
             Route::get('daily', [FinanceController::class, 'daily'])->name('daily');
             Route::get('profit-loss', [FinanceController::class, 'profitLoss'])->name('profitLoss');
+        });
+
+        // --- Sprint 5: Laporan & Export ---
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('sales', [ReportController::class, 'sales'])->name('sales');
+            Route::get('sales/export-excel', [ReportController::class, 'exportSalesExcel'])->name('sales.exportExcel');
+            Route::get('sales/export-pdf', [ReportController::class, 'exportSalesPdf'])->name('sales.exportPdf');
+
+            Route::get('stock', [ReportController::class, 'stock'])->name('stock');
+            Route::get('stock/export-excel', [ReportController::class, 'exportStockExcel'])->name('stock.exportExcel');
+            Route::get('stock/export-pdf', [ReportController::class, 'exportStockPdf'])->name('stock.exportPdf');
+
+            Route::get('expense', [ReportController::class, 'expense'])->name('expense');
+            Route::get('expense/export-excel', [ReportController::class, 'exportExpenseExcel'])->name('expense.exportExcel');
+            Route::get('expense/export-pdf', [ReportController::class, 'exportExpensePdf'])->name('expense.exportPdf');
+
+            Route::get('profit-loss', [ReportController::class, 'profitLoss'])->name('profitLoss');
+            Route::get('profit-loss/export-excel', [ReportController::class, 'exportProfitLossExcel'])->name('profitLoss.exportExcel');
+            Route::get('profit-loss/export-pdf', [ReportController::class, 'exportProfitLossPdf'])->name('profitLoss.exportPdf');
+
+            Route::get('shift/{shift}/export-pdf', [ReportController::class, 'exportShiftPdf'])->name('shift.exportPdf');
         });
     });
 

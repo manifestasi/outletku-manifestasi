@@ -18,6 +18,7 @@ class TransactionItem extends Model
         'product_sku',
         'quantity',
         'unit_price',
+        'cost_price',
         'subtotal',
         'discount',
         'total',
@@ -28,6 +29,7 @@ class TransactionItem extends Model
         return [
             'quantity' => 'integer',
             'unit_price' => 'decimal:2',
+            'cost_price' => 'decimal:2',
             'subtotal' => 'decimal:2',
             'discount' => 'decimal:2',
             'total' => 'decimal:2',

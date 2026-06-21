@@ -86,7 +86,7 @@ class FinanceService
             }
         });
 
-        $cogs = (float) $cogsQuery->selectRaw('SUM(quantity * cost_price) as total_cogs')->value('total_cogs');
+        $cogs = (float) ($cogsQuery->selectRaw('SUM(quantity * cost_price) as total_cogs')->value('total_cogs') ?? 0);
 
         $grossProfit = $income - $cogs;
 

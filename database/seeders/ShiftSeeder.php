@@ -120,6 +120,7 @@ class ShiftSeeder extends Seeder
                             'product_sku' => $item['product']->sku,
                             'quantity' => $item['qty'],
                             'unit_price' => $item['product']->selling_price,
+                            'cost_price' => $item['product']->cost_price,
                             'subtotal' => $item['total'],
                             'discount' => 0,
                             'total' => $item['total'],

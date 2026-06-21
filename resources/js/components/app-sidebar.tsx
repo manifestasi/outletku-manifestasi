@@ -7,6 +7,7 @@ import {
     Receipt,
     Settings,
     Store,
+    TrendingUp,
     Users,
     Package,
     Tags,
@@ -90,6 +91,21 @@ export function AppSidebar() {
                 {
                     title: 'Keuangan',
                     href: '/finance/daily',
+                    icon: BarChart3,
+                },
+                {
+                    title: 'Laporan Penjualan',
+                    href: '/reports/sales',
+                    icon: TrendingUp,
+                },
+                {
+                    title: 'Laporan Stok',
+                    href: '/reports/stock',
+                    icon: Package,
+                },
+                {
+                    title: 'Laporan L/R',
+                    href: '/reports/profit-loss',
                     icon: BarChart3,
                 },
             ]

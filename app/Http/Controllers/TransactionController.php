@@ -179,6 +179,7 @@ class TransactionController extends Controller
                     'product_sku' => $product->sku,
                     'quantity' => $itemData['quantity'],
                     'unit_price' => $itemData['unit_price'],
+                    'cost_price' => $product->cost_price,
                     'subtotal' => $itemData['subtotal'],
                     'discount' => $itemData['discount'],
                     'total' => $itemData['total'],
