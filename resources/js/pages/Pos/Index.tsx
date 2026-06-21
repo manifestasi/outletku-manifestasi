@@ -33,13 +33,15 @@ interface CartItem {
 
 interface PosIndexProps {
     outlet: { id: string; name: string };
+    outlets?: { id: string; name: string }[] | null;
+    mode?: 'cashier' | 'admin';
     shift_id: string | null;
     products: Product[];
     invoicePreview: string;
     flash?: { success?: string; error?: string; transaction_id?: string };
 }
 
-export default function PosIndex({ outlet, shift_id, products, invoicePreview, flash }: PosIndexProps) {
+export default function PosIndex({ outlet, outlets, mode = 'cashier', shift_id, products, invoicePreview, flash }: PosIndexProps) {
     const [search, setSearch] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -211,9 +213,15 @@ export default function PosIndex({ outlet, shift_id, products, invoicePreview, f
         }
     };
 
+    const handleOutletChange = (outletId: string) => {
+        router.get('/transactions/create', { outlet_id: outletId }, { preserveState: false });
+    };
+
+    const pageTitle = mode === 'admin' ? `POS Admin - ${outlet.name}` : `POS - ${outlet.name}`;
+
     return (
-        <KasirLayout title={`POS - ${outlet.name}`}>
-            <Head title={`POS - ${outlet.name}`} />
+        <KasirLayout title={pageTitle}>
+            <Head title={pageTitle} />
 
             <div className="flex flex-col lg:flex-row h-[calc(100vh-73px)] w-full -m-6 rounded-none relative overflow-hidden">
                 {/* Left: Product Grid */}
@@ -232,6 +240,27 @@ export default function PosIndex({ outlet, shift_id, products, invoicePreview, f
                             </div>
                             
                             <div className="flex items-center gap-2">
+                                {mode === 'admin' && outlets && outlets.length > 1 && (
+                                    <select
+                                        value={outlet.id}
+                                        onChange={(e) => handleOutletChange(e.target.value)}
+                                        className="h-10 rounded-lg border border-slate-800 bg-slate-900 px-3 text-sm text-white"
+                                    >
+                                        {outlets.map((o) => (
+                                            <option key={o.id} value={o.id}>{o.name}</option>
+                                        ))}
+                                    </select>
+                                )}
+
+                                {mode === 'admin' && (
+                                    <Button variant="outline" asChild className="border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800">
+                                        <Link href="/transactions">
+                                            <ArrowLeft className="w-4 h-4 sm:mr-2" />
+                                            <span className="hidden sm:inline">Kembali</span>
+                                        </Link>
+                                    </Button>
+                                )}
+
                                 <Button 
                                     variant="outline" 
                                     className="lg:hidden relative border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800 px-3" 

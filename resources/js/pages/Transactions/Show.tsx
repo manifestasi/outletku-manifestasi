@@ -44,9 +44,10 @@ interface Transaction {
 
 interface ShowProps {
     transaction: Transaction;
+    canVoid?: boolean;
 }
 
-export default function TransactionShow({ transaction }: ShowProps) {
+export default function TransactionShow({ transaction, canVoid = false }: ShowProps) {
     const [isVoidOpen, setIsVoidOpen] = useState(false);
 
     // Auto print if ?print=true is in URL
@@ -77,10 +78,7 @@ export default function TransactionShow({ transaction }: ShowProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={[
-            { title: 'Transaksi', href: '/transactions' },
-            { title: transaction.invoice_number, href: `/transactions/${transaction.id}` }
-        ]}>
+        <>
             <Head title={`Invoice ${transaction.invoice_number}`} />
 
             {/* Print Styling */}
@@ -101,7 +99,7 @@ export default function TransactionShow({ transaction }: ShowProps) {
                 }
             `}</style>
 
-            <div className="flex flex-col space-y-6 p-6">
+            <div className="flex flex-col gap-6 p-6 no-print">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print">
                     <div className="flex items-center gap-3">
                         <Button variant="outline" size="icon" asChild>
@@ -115,7 +113,7 @@ export default function TransactionShow({ transaction }: ShowProps) {
                             <Printer className="w-4 h-4 mr-2" /> Cetak
                         </Button>
 
-                        {!transaction.is_void && (
+                        {!transaction.is_void && canVoid && (
                             <Dialog open={isVoidOpen} onOpenChange={setIsVoidOpen}>
                                 <DialogTrigger asChild>
                                     <Button variant="destructive" className="bg-red-600">
@@ -308,6 +306,16 @@ export default function TransactionShow({ transaction }: ShowProps) {
                 </div>
 
             </div>
-        </AppLayout>
+        </>
     );
 }
+
+TransactionShow.layout = (page: React.ReactNode) => (
+    <AppLayout
+        breadcrumbs={[
+            { title: 'Transaksi', href: '/transactions' },
+        ]}
+    >
+        {page}
+    </AppLayout>
+);

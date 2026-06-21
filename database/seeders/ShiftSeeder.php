@@ -26,7 +26,7 @@ class ShiftSeeder extends Seeder
 
         // Find cashier user
         $cashier = User::where('business_id', $business->id)->whereHas('roles', function ($q) {
-            $q->where('name', 'kasir');
+            $q->where('name', 'cashier');
         })->first();
 
         // If no cashier found, use owner

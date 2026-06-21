@@ -23,9 +23,11 @@ interface PinEntryProps {
     business: Business;
     outlet: Outlet;
     user: User;
+    isLocked?: boolean;
+    lockedUntil?: string | null;
 }
 
-export default function PinEntry({ business, outlet, user }: PinEntryProps) {
+export default function PinEntry({ business, outlet, user, isLocked = false, lockedUntil }: PinEntryProps) {
     const { data, setData, post, processing, errors, clearErrors } = useForm({
         pin: '',
     });
@@ -46,7 +48,7 @@ export default function PinEntry({ business, outlet, user }: PinEntryProps) {
     }, [data.pin]);
 
     const handleNumberClick = (num: number) => {
-        if (processing) return;
+        if (processing || isLocked) return;
         if (errors.pin) clearErrors('pin');
         
         if (data.pin.length < 6) {
@@ -55,7 +57,7 @@ export default function PinEntry({ business, outlet, user }: PinEntryProps) {
     };
 
     const handleDelete = () => {
-        if (processing) return;
+        if (processing || isLocked) return;
         if (errors.pin) clearErrors('pin');
 
         if (data.pin.length > 0) {
@@ -113,6 +115,17 @@ export default function PinEntry({ business, outlet, user }: PinEntryProps) {
                     ))}
                 </div>
 
+                {isLocked && (
+                    <div className="text-amber-400 text-center text-sm mb-6 font-medium bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                        Akun terkunci sementara.
+                        {lockedUntil && (
+                            <span className="block text-xs mt-1 text-amber-300/80">
+                                Coba lagi setelah {new Date(lockedUntil).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        )}
+                    </div>
+                )}
+
                 {errors.pin && (
                     <div className="text-red-400 text-center text-sm mb-6 font-medium animate-pulse">
                         {errors.pin}
@@ -126,7 +139,7 @@ export default function PinEntry({ business, outlet, user }: PinEntryProps) {
                             key={num}
                             type="button"
                             onClick={() => handleNumberClick(num)}
-                            disabled={processing}
+                            disabled={processing || isLocked}
                             className="h-16 rounded-2xl bg-slate-900 border border-slate-800 text-2xl font-semibold hover:bg-slate-800 hover:border-indigo-500 transition-colors active:bg-slate-700 disabled:opacity-50"
                         >
                             {num}
@@ -137,7 +150,7 @@ export default function PinEntry({ business, outlet, user }: PinEntryProps) {
                         <button
                             type="button"
                             onClick={() => handleNumberClick(0)}
-                            disabled={processing}
+                            disabled={processing || isLocked}
                             className="w-full h-16 rounded-2xl bg-slate-900 border border-slate-800 text-2xl font-semibold hover:bg-slate-800 hover:border-indigo-500 transition-colors active:bg-slate-700 disabled:opacity-50"
                         >
                             0
@@ -148,7 +161,7 @@ export default function PinEntry({ business, outlet, user }: PinEntryProps) {
                         <button
                             type="button"
                             onClick={handleDelete}
-                            disabled={processing || data.pin.length === 0}
+                            disabled={processing || isLocked || data.pin.length === 0}
                             className="w-full h-16 rounded-2xl bg-slate-900/50 border border-slate-800 text-2xl font-semibold flex items-center justify-center hover:bg-slate-800 hover:border-red-500/50 hover:text-red-400 transition-colors active:bg-slate-700 disabled:opacity-50"
                         >
                             <Delete className="w-6 h-6" />

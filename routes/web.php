@@ -2,11 +2,11 @@
 
 use App\Http\Controllers\Business\BusinessController;
 use App\Http\Controllers\Dashboard\DashboardController;
-use App\Http\Controllers\Outlet\OutletController;
-use App\Http\Controllers\User\UserController;
 use App\Http\Controllers\Kasir\KasirAuthController;
 use App\Http\Controllers\Kasir\ShiftController;
+use App\Http\Controllers\Outlet\OutletController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\User\UserController;
 use App\Http\Middleware\KasirShiftMiddleware;
 use Illuminate\Support\Facades\Route;
 
@@ -37,7 +37,21 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
         Route::post('stocks/adjust', [\App\Http\Controllers\Stock\StockController::class, 'adjust'])->name('stocks.adjust.store');
         Route::get('stocks/movements', [\App\Http\Controllers\Stock\StockController::class, 'movements'])->name('stocks.movements');
         Route::get('stocks/low-alert', [\App\Http\Controllers\Stock\StockController::class, 'lowAlert'])->name('stocks.lowAlert');
+
+        // Transactions (owner/manager)
+        Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+        Route::get('transactions/create', [TransactionController::class, 'create'])->name('transactions.create');
+        Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
+
+        // Shift management (owner/manager)
+        Route::get('shifts', [ShiftController::class, 'index'])->name('shifts.index');
+        Route::get('shifts/{shift}', [ShiftController::class, 'show'])->name('shifts.show');
+        Route::post('shifts/{shift}/force-close', [ShiftController::class, 'forceClose'])->name('shifts.forceClose');
     });
+
+    // Transaction show + store (cashier needs show for receipt print)
+    Route::get('transactions/{transaction}', [TransactionController::class, 'show'])->name('transactions.show');
+    Route::post('transactions', [TransactionController::class, 'store'])->name('transactions.store');
 
     // Stocks for specific outlet (accessible by cashier too, controller will verify assignment)
     Route::get('outlets/{outlet}/stocks', [\App\Http\Controllers\Stock\StockController::class, 'byOutlet'])->name('outlets.stocks');
@@ -53,30 +67,24 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
         Route::put('business', [BusinessController::class, 'update'])->name('business.update');
     });
 
-    // Kasir Logout
-    Route::post('/kasir/logout', [KasirAuthController::class, 'logout'])->name('kasir.logout');
+    // Kasir flow (cashier only)
+    Route::middleware('role:cashier')->group(function () {
+        Route::post('/kasir/logout', [KasirAuthController::class, 'logout'])->name('kasir.logout');
 
-    // Shift Management
-    Route::prefix('shift')->name('shift.')->group(function () {
-        Route::get('open', [ShiftController::class, 'showOpen'])->name('showOpen');
-        Route::post('open', [ShiftController::class, 'open'])->name('open');
-        Route::get('close', [ShiftController::class, 'showClose'])->name('showClose');
-        Route::post('close', [ShiftController::class, 'close'])->name('close');
+        Route::prefix('shift')->name('shift.')->group(function () {
+            Route::get('open', [ShiftController::class, 'showOpen'])->name('showOpen');
+            Route::post('open', [ShiftController::class, 'open'])->name('open');
+        });
+
+        Route::middleware(KasirShiftMiddleware::class)->group(function () {
+            Route::get('/pos', [TransactionController::class, 'create'])->name('pos.index');
+
+            Route::prefix('shift')->name('shift.')->group(function () {
+                Route::get('close', [ShiftController::class, 'showClose'])->name('showClose');
+                Route::post('close', [ShiftController::class, 'close'])->name('close');
+            });
+        });
     });
-
-    // Owner/Manager shift routes
-    Route::middleware('role:owner|manager')->group(function () {
-        Route::resource('shifts', ShiftController::class)->only(['index', 'show']);
-        Route::post('shifts/{shift}/force-close', [ShiftController::class, 'forceClose'])->name('shifts.forceClose');
-    });
-
-    // Transactions
-    Route::resource('transactions', TransactionController::class)->except(['edit', 'update']);
-
-    // POS Route (for kasir)
-    Route::get('/pos', [TransactionController::class, 'create'])
-        ->name('pos.index')
-        ->middleware(KasirShiftMiddleware::class);
 });
 
 // Kasir Auth Routes (Public)

@@ -2,7 +2,9 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Building2,
+    Clock,
     LayoutGrid,
+    Receipt,
     Settings,
     Store,
     Users,
@@ -62,7 +64,17 @@ export function AppSidebar() {
                 {
                     title: 'Manajemen Stok',
                     href: '/stocks',
-                    icon: Package, // Consider using a better icon like 'Layers' or 'Boxes' if available, but Package is fine.
+                    icon: Package,
+                },
+                {
+                    title: 'Transaksi',
+                    href: '/transactions',
+                    icon: Receipt,
+                },
+                {
+                    title: 'Shift Kasir',
+                    href: '/shifts',
+                    icon: Clock,
                 },
             ]
             : []),

@@ -129,7 +129,7 @@ class ShiftController extends Controller
             ->first();
 
         if (!$activeShift) {
-            return redirect()->route('shift.openForm');
+            return redirect()->route('shift.showOpen');
         }
 
         $cashSales = Transaction::where('shift_id', $activeShift->id)
@@ -159,13 +159,22 @@ class ShiftController extends Controller
      */
     public function index(Request $request)
     {
-        $shifts = Shift::with(['outlet', 'user'])
-            ->where('business_id', Auth::user()->business_id)
-            ->latest('started_at')
-            ->paginate(15);
+        $query = Shift::with(['outlet', 'user'])
+            ->where('business_id', Auth::user()->business_id);
+
+        if ($request->filled('status')) {
+            if ($request->status === 'open') {
+                $query->whereNull('ended_at');
+            } elseif ($request->status === 'closed') {
+                $query->whereNotNull('ended_at');
+            }
+        }
+
+        $shifts = $query->latest('started_at')->paginate(15)->withQueryString();
 
         return Inertia::render('Shift/Index', [
             'shifts' => $shifts,
+            'filters' => $request->only(['status']),
         ]);
     }
 
@@ -179,12 +188,23 @@ class ShiftController extends Controller
             abort(404);
         }
 
-        $shift->load(['outlet', 'user', 'transactions' => function($q) {
+        $shift->load(['outlet', 'user', 'transactions' => function ($q) {
             $q->latest('transaction_date');
         }]);
 
+        $validTransactions = $shift->transactions->where('is_void', false);
+
+        $cashSales = $validTransactions
+            ->where('payment_method', 'cash')
+            ->sum('total');
+
+        $totalSales = $validTransactions->sum('total');
+
         return Inertia::render('Shift/Show', [
             'shift' => $shift,
+            'cashSales' => (float) $cashSales,
+            'totalSales' => (float) $totalSales,
+            'transactionCount' => $validTransactions->count(),
         ]);
     }
 

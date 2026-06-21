@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Outlet;
 use App\Models\Product;
+use App\Models\Shift;
 use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Services\StockService;
@@ -43,49 +44,56 @@ class TransactionController extends Controller
     }
 
     /**
-     * POS interface
+     * POS interface (kasir via /pos, owner/manager via /transactions/create)
      */
     public function create(Request $request)
     {
         $user = Auth::user();
         $businessId = $user->business_id;
+        $isCashierFlow = $request->routeIs('pos.index');
 
-        // Determine active outlet and shift
-        $activeOutletId = $request->attributes->get('active_outlet_id') ?? $request->query('outlet_id');
-        $activeShiftId = $request->attributes->get('active_shift_id');
+        if ($isCashierFlow) {
+            $activeOutletId = $request->attributes->get('active_outlet_id');
+            $activeShiftId = $request->attributes->get('active_shift_id');
+            $outlets = null;
+        } else {
+            $outlets = Outlet::where('business_id', $businessId)
+                ->where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'name']);
 
-        if (!$activeOutletId) {
-            // If owner/manager didn't select an outlet, redirect them to select one or default to first
-            $firstOutlet = Outlet::where('business_id', $businessId)->first();
-            if (!$firstOutlet) {
-                return redirect('/dashboard')->with('error', 'Silakan buat outlet terlebih dahulu.');
-            }
-            $activeOutletId = $firstOutlet->id;
+            $activeOutletId = $request->query('outlet_id', $outlets->first()?->id);
+            $activeShiftId = null;
         }
 
-        $outlet = Outlet::findOrFail($activeOutletId);
+        if (! $activeOutletId) {
+            return redirect('/dashboard')->with('error', 'Silakan buat outlet terlebih dahulu.');
+        }
 
-        // Fetch active products with stock for this outlet
+        $outlet = Outlet::where('business_id', $businessId)->findOrFail($activeOutletId);
+
         $products = Product::where('business_id', $businessId)
             ->where('is_active', true)
-            ->with(['category', 'stocks' => function($q) use ($activeOutletId) {
+            ->with(['category', 'stocks' => function ($q) use ($activeOutletId) {
                 $q->where('outlet_id', $activeOutletId);
             }])
             ->get()
             ->map(function ($product) {
                 $stock = $product->stocks->first();
                 $product->current_stock = $stock ? $stock->quantity : 0;
+
                 return $product;
             });
 
-        // Generate invoice number preview (will be regenerated on store to prevent duplicates)
-        $invoicePreview = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(5));
+        $invoicePreview = 'INV-'.date('Ymd').'-'.strtoupper(Str::random(5));
 
         return Inertia::render('Pos/Index', [
             'outlet' => [
                 'id' => $outlet->id,
                 'name' => $outlet->name,
             ],
+            'outlets' => $outlets,
+            'mode' => $isCashierFlow ? 'cashier' : 'admin',
             'shift_id' => $activeShiftId,
             'products' => $products,
             'invoicePreview' => $invoicePreview,
@@ -104,7 +112,7 @@ class TransactionController extends Controller
             'discount' => 'required|numeric|min:0',
             'tax' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
-            'payment_method' => 'required|string',
+            'payment_method' => 'required|string|in:cash,transfer,other',
             'payment_amount' => 'required|numeric|min:0',
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
@@ -116,15 +124,38 @@ class TransactionController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
+        $outlet = Outlet::where('business_id', $user->business_id)->findOrFail($request->outlet_id);
+
+        if ($user->hasRole('cashier')) {
+            if (! $request->shift_id) {
+                return redirect()->back()->with('error', 'Shift aktif diperlukan untuk transaksi kasir.');
+            }
+
+            $shift = Shift::where('id', $request->shift_id)
+                ->where('business_id', $user->business_id)
+                ->where('user_id', $user->id)
+                ->where('outlet_id', $outlet->id)
+                ->whereNull('ended_at')
+                ->first();
+
+            if (! $shift) {
+                return redirect()->back()->with('error', 'Shift tidak valid atau sudah ditutup.');
+            }
+        } elseif ($user->hasAnyRole(['owner', 'manager'])) {
+            $request->merge(['shift_id' => null]);
+        } else {
+            abort(403);
+        }
+
         try {
             DB::beginTransaction();
 
-            $invoiceNumber = 'INV-' . date('Ymd') . '-' . strtoupper(Str::random(5));
+            $invoiceNumber = 'INV-'.date('Ymd').'-'.strtoupper(Str::random(5));
 
             $transaction = Transaction::create([
                 'business_id' => $user->business_id,
-                'outlet_id' => $request->outlet_id,
+                'outlet_id' => $outlet->id,
                 'user_id' => $user->id,
                 'shift_id' => $request->shift_id,
                 'invoice_number' => $invoiceNumber,
@@ -139,8 +170,8 @@ class TransactionController extends Controller
             ]);
 
             foreach ($request->items as $itemData) {
-                $product = Product::find($itemData['product_id']);
-                
+                $product = Product::where('business_id', $user->business_id)->findOrFail($itemData['product_id']);
+
                 TransactionItem::create([
                     'transaction_id' => $transaction->id,
                     'product_id' => $product->id,
@@ -153,14 +184,13 @@ class TransactionController extends Controller
                     'total' => $itemData['total'],
                 ]);
 
-                // Reduce stock
                 $stockService->decreaseStock(
-                    $request->outlet_id,
+                    $outlet->id,
                     $product->id,
                     $itemData['quantity'],
                     'sale',
                     $transaction->id,
-                    'Terjual di POS: ' . $invoiceNumber,
+                    'Terjual di POS: '.$invoiceNumber,
                     $user->id
                 );
             }
@@ -169,12 +199,13 @@ class TransactionController extends Controller
 
             return redirect()->back()->with([
                 'success' => 'Transaksi berhasil diproses.',
-                'transaction_id' => $transaction->id
+                'transaction_id' => $transaction->id,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Gagal memproses transaksi: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal memproses transaksi: '.$e->getMessage());
         }
     }
 
@@ -183,22 +214,33 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        if ($transaction->business_id !== Auth::user()->business_id) {
+        $user = Auth::user();
+
+        if ($transaction->business_id !== $user->business_id) {
             abort(404);
+        }
+
+        if ($user->hasRole('cashier') && $transaction->user_id !== $user->id) {
+            abort(403);
         }
 
         $transaction->load(['outlet', 'user', 'items.product', 'voidedBy']);
 
         return Inertia::render('Transactions/Show', [
             'transaction' => $transaction,
+            'canVoid' => $user->hasAnyRole(['owner', 'manager']),
         ]);
     }
 
     /**
-     * Void a transaction
+     * Void a transaction (owner/manager only)
      */
     public function destroy(Transaction $transaction, StockService $stockService)
     {
+        if (! Auth::user()->hasAnyRole(['owner', 'manager'])) {
+            abort(403);
+        }
+
         if ($transaction->business_id !== Auth::user()->business_id) {
             abort(404);
         }
@@ -216,16 +258,15 @@ class TransactionController extends Controller
                 'voided_by' => Auth::id(),
             ]);
 
-            // Restore stock
             foreach ($transaction->items as $item) {
                 if ($item->product_id) {
                     $stockService->increaseStock(
                         $transaction->outlet_id,
                         $item->product_id,
-                        $item->quantity, // Add back
+                        $item->quantity,
                         'return',
                         $transaction->id,
-                        'Void transaksi: ' . $transaction->invoice_number,
+                        'Void transaksi: '.$transaction->invoice_number,
                         Auth::id()
                     );
                 }
@@ -236,7 +277,8 @@ class TransactionController extends Controller
             return back()->with('success', 'Transaksi berhasil di-void dan stok telah dikembalikan.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal mem-void transaksi: ' . $e->getMessage());
+
+            return back()->with('error', 'Gagal mem-void transaksi: '.$e->getMessage());
         }
     }
 }

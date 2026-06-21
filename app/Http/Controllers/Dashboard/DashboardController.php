@@ -16,7 +16,7 @@ class DashboardController extends Controller
     /**
      * Display the dashboard.
      * Sprint 2: stok kritis.
-     * Sprint 3+: omzet + transaksi akan ditambahkan saat modul transaksi selesai.
+     * Sprint 3: omzet + transaksi hari ini.
      */
     public function index(): Response
     {
