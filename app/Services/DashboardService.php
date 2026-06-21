@@ -27,20 +27,36 @@ class DashboardService
     }
 
     /**
-     * Sprint 3 (placeholder): Akan diisi saat modul transaksi selesai.
-     * Kembalikan array kosong agar DashboardController tidak error di Sprint 2.
+     * Sprint 3: Widget Omzet dan Transaksi.
      *
      * @return array{ todayRevenue: int, todayTransactions: int, activeOutlets: int }
      */
     public function getBasicWidgets(): array
     {
-        $activeOutlets = Auth::check()
-            ? \App\Models\Outlet::where('is_active', true)->count()
-            : 0;
+        $user = Auth::user();
+        if (!$user) {
+            return ['todayRevenue' => 0, 'todayTransactions' => 0, 'activeOutlets' => 0];
+        }
+
+        $activeOutlets = \App\Models\Outlet::where('business_id', $user->business_id)
+            ->where('is_active', true)
+            ->count();
+
+        // Get today's start and end date
+        $startOfDay = now()->startOfDay();
+        $endOfDay = now()->endOfDay();
+
+        // Query today's transactions
+        $transactionsQuery = \App\Models\Transaction::where('business_id', $user->business_id)
+            ->whereBetween('transaction_date', [$startOfDay, $endOfDay])
+            ->where('is_void', false);
+
+        $todayRevenue = (float) $transactionsQuery->sum('total');
+        $todayTransactions = $transactionsQuery->count();
 
         return [
-            'todayRevenue'       => 0,   // Sprint 3: dari transactions.total
-            'todayTransactions'  => 0,   // Sprint 3: count transaksi valid
+            'todayRevenue'       => $todayRevenue,
+            'todayTransactions'  => $todayTransactions,
             'activeOutlets'      => $activeOutlets,
         ];
     }
