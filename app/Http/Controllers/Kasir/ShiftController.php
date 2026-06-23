@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Kasir;
 use App\Http\Controllers\Controller;
 use App\Models\Shift;
 use App\Models\Transaction;
+use App\Models\User;
+use App\Notifications\ShiftCashDiscrepancyNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -140,11 +142,31 @@ class ShiftController extends Controller
         $expectedCash = $activeShift->starting_cash + $cashSales;
 
         $activeShift->update([
-            'ended_at' => now(),
-            'ending_cash' => $request->ending_cash,
+            'ended_at'      => now(),
+            'ending_cash'   => $request->ending_cash,
             'expected_cash' => $expectedCash,
-            'notes' => $request->notes,
+            'notes'         => $request->notes,
         ]);
+
+        // Trigger notifikasi selisih kas ke owner jika >= Rp 10.000
+        $discrepancy = (float) $request->ending_cash - $expectedCash;
+        if (abs($discrepancy) >= 10_000) {
+            $activeShift->loadMissing(['outlet:id,name']);
+            $notification = new ShiftCashDiscrepancyNotification(
+                shiftId:      $activeShift->id,
+                cashierName:  $user->name,
+                outletName:   $activeShift->outlet?->name ?? '-',
+                expectedCash: (float) $expectedCash,
+                actualCash:   (float) $request->ending_cash,
+                discrepancy:  $discrepancy,
+                businessId:   $user->business_id,
+            );
+
+            User::whereHas('roles', fn ($q) => $q->where('name', 'owner'))
+                ->where('business_id', $user->business_id)
+                ->get()
+                ->each(fn (User $owner) => $owner->notify($notification));
+        }
 
         // After closing shift, logout or redirect to pin entry
         Auth::logout();

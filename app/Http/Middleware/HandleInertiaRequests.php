@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -35,19 +36,32 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $unreadNotificationsCount = 0;
+        if ($request->user()) {
+            try {
+                $unreadNotificationsCount = $request->user()->unreadNotifications()->count();
+            } catch (\Throwable) {
+                // Notifications table might not exist yet during migration
+            }
+        }
+
+        $superAdmin = Auth::guard('super_admin')->user();
+
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
-            'auth' => [
+            'name'        => config('app.name'),
+            'auth'        => [
                 'user' => $request->user()?->load('roles'),
             ],
+            'super_admin' => $superAdmin ? ['id' => $superAdmin->id, 'name' => $superAdmin->name, 'email' => $superAdmin->email] : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [
                 'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
+                'error'   => $request->session()->get('error'),
                 'warning' => $request->session()->get('warning'),
-                'info' => $request->session()->get('info'),
+                'info'    => $request->session()->get('info'),
             ],
+            'unreadNotificationsCount' => $unreadNotificationsCount,
         ];
     }
 }

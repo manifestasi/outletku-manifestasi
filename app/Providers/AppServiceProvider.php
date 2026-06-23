@@ -2,9 +2,14 @@
 
 namespace App\Providers;
 
+use App\Listeners\UpdateBusinessLastActivity;
+use App\Models\Transaction;
+use App\Observers\TransactionObserver;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -24,6 +29,9 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+
+        Transaction::observe(TransactionObserver::class);
+        Event::listen(Login::class, UpdateBusinessLastActivity::class);
     }
 
     /**

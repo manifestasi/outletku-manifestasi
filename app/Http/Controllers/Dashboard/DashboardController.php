@@ -9,23 +9,17 @@ use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function __construct(private DashboardService $dashboardService)
-    {
-    }
+    public function __construct(private readonly DashboardService $dashboardService) {}
 
-    /**
-     * Display the dashboard.
-     * Sprint 2: stok kritis.
-     * Sprint 3: omzet + transaksi hari ini.
-     */
     public function index(): Response
     {
-        $stockWidgets = $this->dashboardService->getStockWidgets();
-        $basicWidgets = $this->dashboardService->getBasicWidgets();
-
         return Inertia::render('dashboard/index', [
-            ...$basicWidgets,
-            ...$stockWidgets,
+            ...$this->dashboardService->getWidgetCards(),
+            'revenueChart'   => $this->dashboardService->getRevenueLast7Days(),
+            'recentTrx'      => $this->dashboardService->getRecentTransactions(),
+            'topProducts'    => $this->dashboardService->getTopProducts(),
+            'outletSummary'  => $this->dashboardService->getOutletSummary(),
+            'lowStockAlerts' => $this->dashboardService->getLowStockAlerts(),
         ]);
     }
 }

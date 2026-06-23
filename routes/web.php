@@ -8,6 +8,8 @@ use App\Http\Controllers\Finance\FinanceController;
 use App\Http\Controllers\Kasir\KasirAuthController;
 use App\Http\Controllers\Kasir\ShiftController;
 use App\Http\Controllers\Outlet\OutletController;
+use App\Http\Controllers\AuditLog\AuditLogController;
+use App\Http\Controllers\Notifications\NotificationController;
 use App\Http\Controllers\Reports\ReportController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\User\UserController;
@@ -97,6 +99,19 @@ Route::middleware(['auth', 'verified', 'set.business'])->group(function () {
 
     // Stocks for specific outlet (accessible by cashier too, controller will verify assignment)
     Route::get('outlets/{outlet}/stocks', [\App\Http\Controllers\Stock\StockController::class, 'byOutlet'])->name('outlets.stocks');
+
+    // Audit Log (owner + manager only)
+    Route::middleware('role:owner|manager')->group(function () {
+        Route::get('audit-log', [AuditLogController::class, 'index'])->name('audit-log.index');
+    });
+
+    // Notifications (all authenticated users)
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('{id}/mark-read', [NotificationController::class, 'markRead'])->name('markRead');
+        Route::post('mark-all-read', [NotificationController::class, 'markAllRead'])->name('markAllRead');
+        Route::delete('{id}', [NotificationController::class, 'destroy'])->name('destroy');
+    });
 
     // User management (owner only)
     Route::middleware('role:owner')->group(function () {

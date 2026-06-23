@@ -13,6 +13,10 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            \Illuminate\Support\Facades\Route::middleware('web')
+                ->group(base_path('routes/superadmin.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
@@ -24,10 +28,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'set.business' => \App\Http\Middleware\SetActiveBusiness::class,
-            'check.outlet' => \App\Http\Middleware\CheckOutletAccess::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'set.business'   => \App\Http\Middleware\SetActiveBusiness::class,
+            'check.outlet'   => \App\Http\Middleware\CheckOutletAccess::class,
+            'super_admin'    => \App\Http\Middleware\SuperAdminAuth::class,
+            'role'           => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'     => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })

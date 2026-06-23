@@ -2,6 +2,7 @@ import { Link, usePage } from '@inertiajs/react';
 import {
     BarChart3,
     Building2,
+    ClipboardList,
     Clock,
     LayoutGrid,
     Receipt,
@@ -107,6 +108,11 @@ export function AppSidebar() {
                     title: 'Laporan L/R',
                     href: '/reports/profit-loss',
                     icon: BarChart3,
+                },
+                {
+                    title: 'Audit Log',
+                    href: '/audit-log',
+                    icon: ClipboardList,
                 },
             ]
             : []),
