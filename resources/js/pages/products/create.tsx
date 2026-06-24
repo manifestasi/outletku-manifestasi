@@ -111,7 +111,7 @@ export default function ProductCreate({ categories }: { categories: Category[] }
                         <Button type="button" variant="ghost" className="mr-4" asChild>
                             <Link href="/products">Batal</Link>
                         </Button>
-                        <Button type="submit" disabled={processing} className="bg-indigo-600 hover:bg-indigo-700">
+                        <Button type="submit" isLoading={processing} className="bg-indigo-600 hover:bg-indigo-700">
                             <Save className="w-4 h-4 mr-2" />
                             Simpan Produk
                         </Button>

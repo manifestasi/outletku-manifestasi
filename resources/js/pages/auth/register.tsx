@@ -125,7 +125,7 @@ export default function Register({ passwordRules }: Props) {
                                 tabIndex={7}
                                 data-test="register-user-button"
                             >
-                                {processing && <Spinner />}
+                                
                                 Daftar Sekarang
                             </Button>
                         </div>

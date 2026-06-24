@@ -106,7 +106,7 @@ export default function Restock({ outlets, products }: { outlets: any[]; product
                         <Button variant="outline" type="button" asChild>
                             <Link href={index.url()}>Cancel</Link>
                         </Button>
-                        <Button type="submit" disabled={processing}>Submit Restock</Button>
+                        <Button type="submit" isLoading={processing}>Submit Restock</Button>
                     </CardFooter>
                 </form>
             </Card>

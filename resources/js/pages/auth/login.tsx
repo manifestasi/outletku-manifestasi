@@ -84,10 +84,10 @@ export default function Login({ status, canResetPassword }: Props) {
                                 type="submit"
                                 className="mt-4 w-full"
                                 tabIndex={4}
-                                disabled={processing}
+                                isLoading={processing}
                                 data-test="login-button"
                             >
-                                {processing && <Spinner />}
+                                
                                 Log in
                             </Button>
                         </div>

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Plus, Search, Eye, Receipt } from 'lucide-react';
 import { useState } from 'react';
+import { EmptyState } from '@/components/empty-state';
 import type { Auth } from '@/types/auth';
 
 interface Outlet {
@@ -242,24 +243,20 @@ export default function TransactionIndex({ transactions, outlets, filters }: Tra
                             )}
                         </>
                     ) : (
-                        <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-                            <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center mb-4">
-                                <Receipt className="w-6 h-6 text-gray-400" />
-                            </div>
-                            <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                                Belum ada transaksi
-                            </h3>
-                            <p className="text-xs text-gray-400 max-w-sm">
-                                {hasFilters
-                                    ? 'Tidak ada transaksi yang cocok dengan filter ini. Coba ubah outlet atau tanggal.'
-                                    : 'Transaksi penjualan akan muncul di sini setelah ada penjualan di POS.'}
-                            </p>
-                            {hasFilters && (
-                                <Button variant="outline" size="sm" className="mt-4" onClick={handleReset}>
-                                    Reset Filter
-                                </Button>
-                            )}
-                        </div>
+                        <EmptyState
+                            icon={Receipt}
+                            title="Belum ada transaksi"
+                            description={hasFilters
+                                ? 'Tidak ada transaksi yang cocok dengan filter ini. Coba ubah outlet atau tanggal.'
+                                : 'Transaksi penjualan akan muncul di sini setelah ada penjualan di POS.'}
+                            action={
+                                hasFilters ? (
+                                    <Button variant="outline" size="sm" onClick={handleReset}>
+                                        Reset Filter
+                                    </Button>
+                                ) : undefined
+                            }
+                        />
                     )}
                 </div>
             </div>

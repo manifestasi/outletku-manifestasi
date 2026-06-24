@@ -192,9 +192,9 @@ export default function UsersEdit({ user, outlets, assignedOutletIds }: Props) {
                         <Button
                             type="submit"
                             className="bg-indigo-600 hover:bg-indigo-700 flex-1"
-                            disabled={processing}
+                            isLoading={processing}
                         >
-                            {processing && <Spinner />}
+                            
                             Simpan Perubahan
                         </Button>
                         <a href="/users">

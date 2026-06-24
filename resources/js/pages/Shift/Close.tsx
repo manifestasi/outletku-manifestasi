@@ -114,7 +114,7 @@ export default function ShiftClose({ shift, cashSales, expectedCash }: ShiftClos
                         </Button>
                         <Button 
                             type="submit" 
-                            disabled={processing} 
+                            isLoading={processing} 
                             className="flex-1 h-12 bg-red-600 hover:bg-red-700 text-white font-semibold"
                         >
                             {processing ? 'Memproses...' : 'Tutup Shift'}

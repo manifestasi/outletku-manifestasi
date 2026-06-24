@@ -129,7 +129,7 @@ export default function ShiftShow({ shift, cashSales, totalSales, transactionCou
                                     <Button
                                         className="bg-red-600 hover:bg-red-700 text-white"
                                         onClick={handleForceClose}
-                                        disabled={processing}
+                                        isLoading={processing}
                                     >
                                         {processing ? 'Memproses...' : 'Ya, Force Close'}
                                     </Button>
