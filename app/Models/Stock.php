@@ -31,7 +31,7 @@ class Stock extends Model
         return LogOptions::defaults()
             ->logOnly(['quantity', 'low_stock_threshold'])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->useLogName('stock');
     }
 
