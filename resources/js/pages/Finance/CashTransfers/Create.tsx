@@ -150,7 +150,7 @@ export default function CashTransfersCreate({ outlets, today }: Props) {
                             <Button variant="outline" type="button" asChild>
                                 <Link href={transfersIndex.url()}>Batal</Link>
                             </Button>
-                            <Button type="submit" disabled={processing} className="bg-indigo-600 hover:bg-indigo-700">
+                            <Button type="submit" isLoading={processing} className="bg-indigo-600 hover:bg-indigo-700">
                                 {processing ? 'Menyimpan...' : 'Simpan Transfer'}
                             </Button>
                         </div>

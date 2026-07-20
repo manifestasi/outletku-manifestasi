@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { EmptyState } from '@/components/empty-state';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 import AppLayout from '@/layouts/app-layout';
 import type { Outlet, PaginatedData } from '@/types/outletku';
 import { index as outletsIndex, create as outletsCreate } from '@/actions/App/Http/Controllers/Outlet/OutletController';
@@ -15,15 +17,22 @@ type Props = {
 
 export default function OutletsIndex({ outlets, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
+    const [outletToDeactivate, setOutletToDeactivate] = useState<Outlet | null>(null);
+    const [isDeactivating, setIsDeactivating] = useState(false);
 
     function handleSearch(e: React.FormEvent) {
         e.preventDefault();
         router.get(outletsIndex.url(), { search }, { preserveState: true, replace: true });
     }
 
-    function handleDeactivate(outlet: Outlet) {
-        if (!confirm(`Nonaktifkan outlet "${outlet.name}"?`)) return;
-        router.delete(`/outlets/${outlet.id}`);
+    function confirmDeactivate() {
+        if (!outletToDeactivate) return;
+        router.delete(`/outlets/${outletToDeactivate.id}`, {
+            onStart: () => setIsDeactivating(true),
+            onSuccess: () => setOutletToDeactivate(null),
+            onFinish: () => setIsDeactivating(false),
+            preserveScroll: true,
+        });
     }
 
     return (
@@ -57,28 +66,40 @@ export default function OutletsIndex({ outlets, filters }: Props) {
                     <Button type="submit" variant="outline">Cari</Button>
                 </form>
 
+                <ConfirmDialog
+                    isOpen={!!outletToDeactivate}
+                    onOpenChange={(open) => !open && setOutletToDeactivate(null)}
+                    title="Konfirmasi Penonaktifan"
+                    description={`Apakah Anda yakin ingin menonaktifkan outlet "${outletToDeactivate?.name}"? Kasir pada outlet ini tidak akan bisa login.`}
+                    confirmText="Ya, Nonaktifkan"
+                    cancelText="Batal"
+                    onConfirm={confirmDeactivate}
+                    isDestructive={true}
+                    isLoading={isDeactivating}
+                />
+
                 {/* Outlet Cards */}
                 {outlets.data.length === 0 ? (
-                    <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/50 p-12 text-center">
-                        <Store className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                        <h3 className="text-sm font-semibold text-gray-600 mb-1">Belum ada outlet</h3>
-                        <p className="text-xs text-gray-400 mb-4">
-                            Tambahkan outlet pertama untuk mulai mengelola bisnis kamu.
-                        </p>
-                        <Link href="/outlets/create">
-                            <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                                <Plus className="w-4 h-4 mr-1" />
-                                Tambah Outlet
-                            </Button>
-                        </Link>
-                    </div>
+                    <EmptyState
+                        icon={Store}
+                        title="Belum ada outlet"
+                        description="Tambahkan outlet pertama untuk mulai mengelola bisnis kamu."
+                        action={
+                            <Link href="/outlets/create">
+                                <Button size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                                    <Plus className="w-4 h-4 mr-1" />
+                                    Tambah Outlet
+                                </Button>
+                            </Link>
+                        }
+                    />
                 ) : (
                     <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                         {outlets.data.map((outlet) => (
                             <OutletCard
                                 key={outlet.id}
                                 outlet={outlet}
-                                onDeactivate={() => handleDeactivate(outlet)}
+                                onDeactivate={() => setOutletToDeactivate(outlet)}
                             />
                         ))}
                     </div>

@@ -22,7 +22,7 @@ class Product extends Model
         return LogOptions::defaults()
             ->logOnly(['name', 'sku', 'selling_price', 'cost_price', 'is_active'])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->useLogName('product');
     }
 

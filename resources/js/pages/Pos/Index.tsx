@@ -553,7 +553,7 @@ export default function PosIndex({ outlet, outlets, mode = 'cashier', shift_id, 
 
                         <Button 
                             type="submit" 
-                            disabled={processing} 
+                            isLoading={processing} 
                             className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-lg"
                         >
                             {processing ? 'Memproses...' : 'Proses Pembayaran'}

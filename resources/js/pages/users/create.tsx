@@ -193,9 +193,9 @@ export default function UsersCreate({ outlets }: Props) {
                         <Button
                             type="submit"
                             className="bg-indigo-600 hover:bg-indigo-700 flex-1"
-                            disabled={processing || !data.role}
+                            isLoading={processing} disabled={processing || !data.role}
                         >
-                            {processing && <Spinner />}
+                            
                             Simpan User
                         </Button>
                         <a href="/users">

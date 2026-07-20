@@ -112,7 +112,7 @@ export default function Security(props: Props) {
 
                             <div className="flex items-center gap-4">
                                 <Button
-                                    disabled={processing}
+                                    isLoading={processing}
                                     data-test="update-password-button"
                                 >
                                     Save

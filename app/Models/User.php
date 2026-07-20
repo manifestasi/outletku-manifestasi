@@ -50,7 +50,7 @@ class User extends Authenticatable implements PasskeyUser
         return LogOptions::defaults()
             ->logOnly(['name', 'email', 'phone', 'is_active', 'pin'])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->useLogName('user');
     }
 

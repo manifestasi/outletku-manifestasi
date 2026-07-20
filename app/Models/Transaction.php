@@ -20,7 +20,7 @@ class Transaction extends Model
         return LogOptions::defaults()
             ->logOnly(['invoice_number', 'is_void', 'void_reason'])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->useLogName('transaction');
     }
 

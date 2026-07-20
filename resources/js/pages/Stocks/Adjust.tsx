@@ -106,7 +106,7 @@ export default function Adjust({ outlets, products }: { outlets: any[]; products
                         <Button variant="outline" type="button" asChild>
                             <Link href={index.url()}>Cancel</Link>
                         </Button>
-                        <Button type="submit" disabled={processing}>Save Adjustment</Button>
+                        <Button type="submit" isLoading={processing}>Save Adjustment</Button>
                     </CardFooter>
                 </form>
             </Card>

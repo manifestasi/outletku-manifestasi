@@ -20,6 +20,7 @@ class DashboardController extends Controller
             'topProducts'    => $this->dashboardService->getTopProducts(),
             'outletSummary'  => $this->dashboardService->getOutletSummary(),
             'lowStockAlerts' => $this->dashboardService->getLowStockAlerts(),
+            'communityWaLink' => env('COMMUNITY_WA_LINK'),
         ]);
     }
 }

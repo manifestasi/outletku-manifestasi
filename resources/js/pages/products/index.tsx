@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, PackageX } from 'lucide-react';
+import { EmptyState } from '@/components/empty-state';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
 interface Category {
     id: string;
@@ -45,6 +47,7 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
     const [search, setSearch] = useState(filters.search || '');
     const [categoryId, setCategoryId] = useState(filters.category_id || 'all');
     const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = (product: Product) => {
         setProductToDelete(product);
@@ -53,7 +56,9 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
     const confirmDelete = () => {
         if (productToDelete) {
             router.delete(`/products/${productToDelete.id}`, {
+                onStart: () => setIsDeleting(true),
                 onSuccess: () => setProductToDelete(null),
+                onFinish: () => setIsDeleting(false),
                 preserveScroll: true,
             });
         }
@@ -89,21 +94,17 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                     </div>
                 </div>
 
-                <Dialog open={!!productToDelete} onOpenChange={(open) => !open && setProductToDelete(null)}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Konfirmasi Hapus</DialogTitle>
-                        </DialogHeader>
-                        <p className="text-sm text-gray-500 mt-2">
-                            Apakah Anda yakin ingin menonaktifkan produk <span className="font-semibold text-gray-900">"{productToDelete?.name}"</span>? 
-                            Produk tidak akan muncul lagi di kasir POS.
-                        </p>
-                        <div className="flex justify-end gap-2 mt-6">
-                            <Button type="button" variant="ghost" onClick={() => setProductToDelete(null)}>Batal</Button>
-                            <Button type="button" className="bg-red-600 hover:bg-red-700 text-white" onClick={confirmDelete}>Ya, Hapus</Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                <ConfirmDialog
+                    isOpen={!!productToDelete}
+                    onOpenChange={(open) => !open && setProductToDelete(null)}
+                    title="Konfirmasi Hapus"
+                    description={`Apakah Anda yakin ingin menonaktifkan produk "${productToDelete?.name}"? Produk tidak akan muncul lagi di kasir POS.`}
+                    confirmText="Ya, Hapus"
+                    cancelText="Batal"
+                    onConfirm={confirmDelete}
+                    isDestructive={true}
+                    isLoading={isDeleting}
+                />
 
                 <div className="bg-white border border-gray-100 rounded-xl shadow-sm p-4">
                     <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -190,8 +191,12 @@ export default function ProductIndex({ products, categories, filters }: IndexPro
                                     </tr>
                                 )) : (
                                     <tr>
-                                        <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
-                                            Tidak ada produk ditemukan.
+                                        <td colSpan={7} className="px-4 py-8">
+                                            <EmptyState
+                                                icon={PackageX}
+                                                title="Tidak ada produk ditemukan"
+                                                description="Mungkin belum ada produk atau tidak ada yang cocok dengan pencarian Anda."
+                                            />
                                         </td>
                                     </tr>
                                 )}

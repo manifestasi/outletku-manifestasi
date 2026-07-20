@@ -76,7 +76,7 @@ export default function ShiftOpen() {
 
                     <Button 
                         type="submit" 
-                        disabled={processing} 
+                        isLoading={processing} 
                         className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white text-base font-semibold"
                     >
                         {processing ? 'Memproses...' : 'Mulai Shift'}

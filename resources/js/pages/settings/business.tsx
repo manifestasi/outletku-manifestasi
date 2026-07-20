@@ -146,9 +146,9 @@ export default function SettingsBusiness({ business }: Props) {
                     <Button
                         type="submit"
                         className="bg-indigo-600 hover:bg-indigo-700 w-full"
-                        disabled={processing}
+                        isLoading={processing}
                     >
-                        {processing && <Spinner />}
+                        
                         Simpan Pengaturan
                     </Button>
                 </form>

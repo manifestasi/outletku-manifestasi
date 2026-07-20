@@ -36,7 +36,7 @@ class Outlet extends Model
         return LogOptions::defaults()
             ->logOnly(['name', 'address', 'phone', 'is_active'])
             ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
+            ->dontLogEmptyChanges()
             ->useLogName('outlet');
     }
 

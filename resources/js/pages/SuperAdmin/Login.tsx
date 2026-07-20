@@ -55,7 +55,7 @@ export default function SuperAdminLogin() {
                                     <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">Ingat saya</Label>
                                 </div>
 
-                                <Button type="submit" disabled={processing} className="w-full bg-indigo-600 hover:bg-indigo-700">
+                                <Button type="submit" isLoading={processing} className="w-full bg-indigo-600 hover:bg-indigo-700">
                                     {processing ? 'Masuk...' : 'Masuk'}
                                 </Button>
                             </div>
