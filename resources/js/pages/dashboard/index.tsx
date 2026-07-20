@@ -7,6 +7,7 @@ import {
     BarChart3,
     Clock,
     DollarSign,
+    MessageCircle,
     Package,
     Receipt,
     ShoppingBag,
@@ -35,13 +36,14 @@ interface Props {
     topProducts: TopProduct[];
     outletSummary: OutletRow[];
     lowStockAlerts: LowStock[];
+    communityWaLink?: string | null;
 }
 
 const PAYMENT_LABEL: Record<string, string> = { cash: 'Tunai', transfer: 'Transfer', other: 'Lainnya' };
 
 export default function Dashboard({
     todayRevenue, todayTransactions, activeOutlets, todayExpense, todayNetCash, lowStockCount,
-    revenueChart, recentTrx, topProducts, outletSummary, lowStockAlerts,
+    revenueChart, recentTrx, topProducts, outletSummary, lowStockAlerts, communityWaLink,
 }: Props) {
     const { auth } = usePage<{ auth: Auth }>().props;
     const roles     = (auth.user.roles ?? []).map(r => r.name);
@@ -74,6 +76,25 @@ export default function Dashboard({
                             <Link href="/reports/stock" className="underline font-medium">Lihat laporan stok →</Link>
                         </span>
                     </div>
+                )}
+
+                {/* Community WA Banner — for owners */}
+                {isOM && communityWaLink && (
+                    <a
+                        href={communityWaLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-4 px-5 py-4 bg-[#754ef9]/10 border border-[#754ef9]/30 rounded-xl hover:bg-[#754ef9]/15 transition-colors group"
+                    >
+                        <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-[#754ef9]/20 flex items-center justify-center">
+                            <MessageCircle className="w-6 h-6 text-[#754ef9]" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-[#754ef9]">Gabung Komunitas WhatsApp Manifestasi</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Diskusi bareng pebisnis lain, dapat tips, dan update fitur terbaru langsung dari tim kami.</p>
+                        </div>
+                        <span className="text-xs font-semibold text-[#754ef9] group-hover:underline whitespace-nowrap">Bergabung →</span>
+                    </a>
                 )}
 
                 {/* Widget Cards */}
