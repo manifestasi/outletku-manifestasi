@@ -13,7 +13,8 @@ interface Activity {
     subject_type: string | null;
     subject_id: string | null;
     causer: { id: string; name: string } | null;
-    properties: { attributes?: Record<string, unknown>; old?: Record<string, unknown> } | null;
+    attribute_changes: { attributes?: Record<string, unknown>; old?: Record<string, unknown> } | null;
+    properties: Record<string, unknown> | null;
     created_at: string;
 }
 interface User { id: string; name: string }
@@ -52,18 +53,19 @@ export default function AuditLogIndex({ logs, users, logNames, filters }: Props)
         return type.split('\\').pop() ?? type;
     }
 
-    function formatProperties(props: Activity['properties']) {
-        if (!props) return null;
-        const attrs = props.attributes;
-        const old   = props.old;
-        if (!attrs) return null;
+    function formatChanges(activity: Activity) {
+        const changes = activity.attribute_changes;
+        if (!changes) return null;
+        const attrs = changes.attributes;
+        const old   = changes.old;
+        if (!attrs || Object.keys(attrs).length === 0) return null;
         return Object.entries(attrs).map(([key, val]) => (
-            <span key={key} className="inline-flex items-center gap-1 mr-1 mb-1">
-                <span className="font-mono text-gray-500">{key}:</span>
+            <span key={key} className="inline-flex items-center gap-1 mr-1 mb-1 text-[11px]">
+                <span className="font-mono text-gray-400 text-[10px]">{key}:</span>
                 {old && key in old && (
-                    <><span className="line-through text-red-400 font-mono">{JSON.stringify(old[key])}</span><span className="text-gray-400">→</span></>
+                    <><span className="line-through text-red-400 font-mono">{String(old[key])}</span><span className="text-gray-300 mx-0.5">→</span></>
                 )}
-                <span className="text-indigo-700 font-mono">{JSON.stringify(val)}</span>
+                <span className="text-indigo-700 font-mono font-medium">{String(val)}</span>
             </span>
         ));
     }
@@ -158,7 +160,10 @@ export default function AuditLogIndex({ logs, users, logNames, filters }: Props)
                                             {log.causer?.name ?? '–'}
                                         </td>
                                         <td className="px-5 py-3 text-xs text-gray-600 max-w-xs">
-                                            <div className="flex flex-wrap">{formatProperties(log.properties)}</div>
+                                            <div className="flex flex-wrap">{formatChanges(log)}</div>
+                                            {!formatChanges(log) && (
+                                                <span className="text-gray-300 text-[11px] italic">—</span>
+                                            )}
                                         </td>
                                     </tr>
                                 )) : (
